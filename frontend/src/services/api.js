@@ -1,62 +1,80 @@
 import axios from 'axios';
 
+const LOCAL_API = 'http://127.0.0.1:8000/api/v1';
+const PRODUCTION_API = 'https://sportiq-2.onrender.com/api/v1';
+
 const getApiBaseUrl = () => {
-  if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL;
-  }
-  if (typeof window !== 'undefined' && window.location) {
+  const configured = import.meta.env.VITE_API_URL?.trim();
+  if (configured) return configured.replace(/\/$/, '');
+
+  if (typeof window !== 'undefined') {
     const host = window.location.hostname;
-    if (host === 'localhost' || host === '127.0.0.1' || host.startsWith('192.168.') || host.startsWith('10.')) {
-      return 'http://127.0.0.1:8000/api/v1';
-    }
+    if (
+      host === 'localhost' ||
+      host === '127.0.0.1' ||
+      host.startsWith('192.168.') ||
+      host.startsWith('10.')
+    ) return LOCAL_API;
   }
-  return 'https://sportiq-2.onrender.com/api/v1';
+  return PRODUCTION_API;
 };
 
 const api = axios.create({
   baseURL: getApiBaseUrl(),
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  timeout: 15000,
+  headers: { 'Content-Type': 'application/json' },
+  timeout: 20000,
 });
 
-// Request Interceptor: Attach JWT Bearer Token and enforce live backend if deployed
 api.interceptors.request.use(
   (config) => {
-    if (typeof window !== 'undefined' && window.location) {
+    if (typeof window !== 'undefined') {
       const host = window.location.hostname;
-      const isLocal = host === 'localhost' || host === '127.0.0.1' || host.startsWith('192.168.') || host.startsWith('10.');
-      if (!isLocal && (!config.baseURL || config.baseURL.includes('127.0.0.1') || config.baseURL.includes('localhost'))) {
-        config.baseURL = 'https://sportiq-2.onrender.com/api/v1';
+      const isLocal = host === 'localhost' || host === '127.0.0.1' ||
+        host.startsWith('192.168.') || host.startsWith('10.');
+
+      // Never allow a deployed frontend to accidentally call localhost.
+      if (!isLocal && (!config.baseURL || /localhost|127\.0\.0\.1/.test(config.baseURL))) {
+        config.baseURL = PRODUCTION_API;
       }
     }
+
     const token = localStorage.getItem('sportiq_token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+    config.headers = config.headers || {};
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+    else delete config.headers.Authorization;
+
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// Response Interceptor: Handle APIResponse envelope and 401 Logout
 api.interceptors.response.use(
-  (response) => {
-    // Backend wraps data in { success: true, message: "...", data: {...} }
-    return response.data;
-  },
+  (response) => response.data,
   (error) => {
-    if (error.response?.status === 401) {
+    const status = error.response?.status;
+    if (status === 401) {
       localStorage.removeItem('sportiq_token');
       localStorage.removeItem('sportiq_user');
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('sportiq:unauthorized'));
+      }
     }
-    const message =
+
+    const serverMessage =
       error.response?.data?.message ||
       error.response?.data?.detail ||
-      error.message ||
-      'Network error. Please check if the server is running.';
-    return Promise.reject(new Error(message));
+      error.response?.data?.error;
+    const message = serverMessage ||
+      (error.code === 'ECONNABORTED'
+        ? 'The server took too long to respond. Please try again.'
+        : !error.response
+          ? 'Cannot connect to SportIQ services. The backend may be waking up; please retry shortly.'
+          : error.message || 'Request failed. Please try again.');
+
+    const normalizedError = new Error(typeof message === 'string' ? message : 'Request failed. Please try again.');
+    normalizedError.status = status;
+    normalizedError.code = error.code;
+    return Promise.reject(normalizedError);
   }
 );
 

@@ -1,0 +1,118 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* SportIQ Fixed Palette Variables */
+  --sportiq-bg: #0B1220;
+  --sportiq-card: #111C2E;
+  --sportiq-card-hover: #16243B;
+  --sportiq-surface: #0E1726;
+  --sportiq-border: #1E293B;
+  --sportiq-border-subtle: rgba(148, 163, 184, 0.12);
+  --sportiq-primary: #2563EB;
+  --sportiq-primary-hover: #1D4ED8;
+  --sportiq-ai: #06B6D4;
+  --sportiq-ai-hover: #0891B2;
+  --sportiq-success: #22C55E;
+  --sportiq-warning: #F59E0B;
+  --sportiq-error: #EF4444;
+  --sportiq-text: #F8FAFC;
+  --sportiq-muted: #94A3B8;
+
+  /* Theme mappings (Default Deep Navy) */
+  --bg-main: #0B1220;
+  --bg-card: #111C2E;
+  --bg-card-hover: #16243B;
+  --bg-surface: #0E1726;
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  --border-color: #1E293B;
+  --border-subtle: rgba(148, 163, 184, 0.12);
+  --input-bg: #111C2E;
+  --input-border: #1E293B;
+  --scrollbar-track: #0B1220;
+  --scrollbar-thumb: #1E293B;
+  --scrollbar-thumb-hover: #334155;
+}
+
+.light {
+  --bg-main: #F1F5F9;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F8FAFC;
+  --bg-surface: #FFFFFF;
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #64748B;
+  --border-color: #E2E8F0;
+  --border-subtle: #F1F5F9;
+  --input-bg: #FFFFFF;
+  --input-border: #CBD5E1;
+  --scrollbar-track: #F1F5F9;
+  --scrollbar-thumb: #CBD5E1;
+  --scrollbar-thumb-hover: #94A3B8;
+}
+
+.dark {
+  --bg-main: #0B1220;
+  --bg-card: #111C2E;
+  --bg-card-hover: #16243B;
+  --bg-surface: #0E1726;
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  --border-color: #1E293B;
+  --border-subtle: rgba(148, 163, 184, 0.12);
+  --input-bg: #111C2E;
+  --input-border: #1E293B;
+  --scrollbar-track: #0B1220;
+  --scrollbar-thumb: #1E293B;
+  --scrollbar-thumb-hover: #334155;
+}
+
+@layer base {
+  body {
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    overflow-x: hidden;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+  }
+}
+
+.font-display {
+  font-family: 'Outfit', 'Inter', sans-serif;
+}
+
+/* Card & Surface Classes */
+.sportiq-card {
+  background-color: #111C2E;
+  border: 1px solid #1E293B;
+  border-radius: 1rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.sportiq-card-hover:hover {
+  background-color: #16243B;
+  border-color: rgba(37, 99, 235, 0.4);
+}
+
+.radial-bg {
+  background: radial-gradient(circle at 50% 0%, rgba(37, 99, 235, 0.08), transparent 70%);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}

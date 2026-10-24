@@ -1,0 +1,41 @@
+# Environment Variables & Secrets
+.env
+.env.*
+*.env
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example
+!frontend/.env.production
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.pytest_cache/
+*.db
+*.sqlite3
+test_sportiq.db
+
+# Node / Frontend
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Uploads & Media
+uploads/video_assessments/*
+uploads/profile_photos/*
+uploads/evidence/*
+!uploads/**/.gitkeep
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

@@ -29,6 +29,14 @@ const persistSession = (rawResponse) => {
 };
 
 export const authService = {
+  async sendOTP({ purpose, channel, destination }) {
+    return unwrap(await api.post('/otp/send', { purpose, channel, destination }));
+  },
+
+  async verifyOTP({ purpose, channel, destination, code }) {
+    return unwrap(await api.post('/otp/verify', { purpose, channel, destination, code }));
+  },
+
   async register(data) {
     return persistSession(await api.post('/auth/register', data));
   },

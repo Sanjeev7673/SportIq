@@ -1,58 +1,61 @@
-# SportIQ
+# SportIQ — AI Sports Talent Assessment & Opportunity Discovery Platform
 
-AI-powered sports talent discovery and performance platform.
+SportIQ is a React/Vite frontend for sports talent discovery, performance tracking, coach/scout workflows, and event management.
 
-## Frontend
-
-- React 18 + Vite
-- Development: `npm install` then `npm run dev`
-- Production build: `npm run build`
-
-## Required source layout
-
-The current `App.jsx` imports modules from `context/`, `components/layout/`, `pages/`, and `utils/`. Those exact folders and files must be restored for the app to compile.
-
-Recommended full-stack structure:
+## Repository structure
 
 ```text
 SportIq/
 ├── frontend/
 │   ├── package.json
+│   ├── package-lock.json
 │   ├── index.html
+│   ├── vite.config.js
+│   ├── vercel.json
 │   └── src/
 │       ├── main.jsx
 │       ├── App.jsx
-│       ├── context/
-│       ├── components/layout/
-│       ├── pages/
+│       ├── components/
 │       │   ├── auth/
-│       │   ├── events/
-│       │   ├── player/
+│       │   ├── charts/
 │       │   ├── coach/
-│       │   ├── scout/
+│       │   ├── common/
+│       │   ├── layout/
+│       │   ├── player/
+│       │   └── scout/
+│       ├── context/
+│       ├── hooks/
+│       ├── pages/
+│       │   ├── admin/
+│       │   ├── auth/
+│       │   ├── coach/
+│       │   ├── events/
 │       │   ├── organizer/
-│       │   └── admin/
-│       ├── utils/
-│       └── assets/
-├── backend/
-│   ├── app/
-│   │   ├── main.py
-│   │   ├── api/
-│   │   ├── models/
-│   │   ├── schemas/
-│   │   ├── services/
-│   │   └── core/
-│   ├── requirements.txt
-│   ├── .env.example
-│   └── README.md
+│       │   ├── player/
+│       │   └── scout/
+│       ├── services/
+│       └── utils/
 ├── .gitignore
 └── README.md
 ```
 
-## Environment and deployment
+## Run the frontend locally
 
-Keep secrets in hosting environment settings or local ignored env files. Commit only example templates; do not commit credentials, databases, or private uploads. Deploy the Vite frontend from the directory containing its `package.json`; deploy the Python API separately and set `VITE_API_URL` / `VITE_SERVER_URL` to its public base URL.
+1. `cd frontend`
+2. `npm install`
+3. Copy `.env.example` to `.env.local` and set the API URLs.
+4. `npm run dev`
 
-## Current repair status
+Production build: `npm run build`.
 
-The Vite entry-point reference was updated to `/main.jsx` to match the current root-level file. However, the repository still has a flattened layout and the imported `context/`, `components/layout/`, `pages/`, and `utils/` source modules have not been restored. A successful build is not yet confirmed. Restore the original source archive into the correct directories before deploying.
+## Environment safety
+
+Do not commit real environment files, secrets, local databases, or private uploads. The root `.gitignore` excludes these. Use hosting environment settings for production values.
+
+## Vercel
+
+The Vercel project is configured to use `frontend` as its Root Directory, with `npm install`, `npm run build`, and `dist` as the output directory.
+
+## Backend status
+
+The original archive includes a FastAPI backend, but the backend source has not yet been restored to this GitHub repository. The frontend therefore still requires a separately deployed API and correctly configured `VITE_API_URL` / `VITE_SERVER_URL` values before all live features can work end-to-end.

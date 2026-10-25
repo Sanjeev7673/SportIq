@@ -57,7 +57,7 @@ export const RegisterPage = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input label="Full name" type="text" placeholder="Your full name" required icon={User} value={formData.name} onChange={(e) => handleChange('name', e.target.value)} />
             <Input label="Email address" type="email" placeholder="you@example.com" required icon={Mail} value={formData.email} onChange={(e) => handleChange('email', e.target.value)} />
-            <Select label="I am a" options={roleOptions} value={formData.role} onChange={(value) => handleChange('role', value)} />
+            <Select label="I am a" options={roleOptions} value={formData.role} onChange={(event) => handleChange('role', event.target.value)} />
             <Input label="Password" type="password" placeholder="At least 8 characters" required icon={Lock} showPasswordToggle value={formData.password} onChange={(e) => handleChange('password', e.target.value)} />
             <Input label="Confirm password" type="password" placeholder="Re-enter your password" required icon={Lock} showPasswordToggle value={formData.confirm_password} onChange={(e) => handleChange('confirm_password', e.target.value)} />
             <p className="text-xs text-[var(--text-secondary)]">Email verification is temporarily disabled while we test the platform. You can sign in immediately after creating your account.</p>

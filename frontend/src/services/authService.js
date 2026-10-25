@@ -65,8 +65,11 @@ export const authService = {
   },
 
   async getMe() {
-    const user = unwrap(await api.get('/auth/me'));
-    if (!user || typeof user !== 'object' || Array.isArray(user)) {
+    const response = unwrap(await api.get('/auth/me'));
+    // The API returns { success: true, user: {...} }; store the user object,
+    // not the surrounding response envelope.
+    const user = response?.user ?? response;
+    if (!user || typeof user !== 'object' || Array.isArray(user) || !user.id || !user.role) {
       throw new Error('The server returned an invalid session response.');
     }
     localStorage.setItem('sportiq_user', JSON.stringify(user));

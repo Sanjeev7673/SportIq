@@ -53,6 +53,16 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(254), unique=True, index=True)
     password_hash: Mapped[str] = mapped_column(String(255))
     role: Mapped[str] = mapped_column(String(20), default="athlete")
+    email_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+class PasswordResetGrant(Base):
+    __tablename__ = "password_reset_grants"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime)
+    used_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 class AthleteProfile(Base):
@@ -171,6 +181,10 @@ class LoginIn(BaseModel):
     email: EmailStr
     password: str
 
+class ResetPasswordIn(BaseModel):
+    reset_token: str = Field(min_length=32, max_length=256)
+    new_password: str = Field(min_length=8, max_length=72)
+
 class ProfileIn(BaseModel):
     sport: str = Field(min_length=2, max_length=80)
     discipline: str = Field(default="", max_length=100)
@@ -213,7 +227,7 @@ class EventIn(BaseModel):
     description: str = Field(default="", max_length=3000)
 
 def user_json(u: User):
-    return {"id": u.id, "name": u.name, "email": u.email, "role": u.role, "created_at": u.created_at.isoformat()}
+    return {"id": u.id, "name": u.name, "email": u.email, "role": u.role, "email_verified": u.email_verified, "created_at": u.created_at.isoformat()}
 
 @app.get("/")
 def root():
@@ -230,14 +244,31 @@ def register(payload: RegisterIn, db: Session = Depends(get_db)):
         raise HTTPException(status_code=409, detail="An account with this email already exists")
     user = User(name=payload.name.strip(), email=email, password_hash=pwd_context.hash(payload.password), role=payload.role)
     db.add(user); db.commit(); db.refresh(user)
-    return {"success": True, "user": user_json(user), "access_token": create_token(user), "token_type": "bearer", "verification_required": True, "message": "Account created. Email/phone OTP verification must be completed before enabling verified-only actions."}
+    return {"success": True, "user": user_json(user), "verification_required": True, "message": "Account created. Verify your email with the registration OTP before logging in."}
 
 @app.post("/api/v1/auth/login")
 def login(payload: LoginIn, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == str(payload.email).lower()).first()
     if not user or not pwd_context.verify(payload.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Incorrect email or password")
+    if not user.email_verified:
+        raise HTTPException(status_code=403, detail="Verify your email before logging in.")
     return {"success": True, "user": user_json(user), "access_token": create_token(user), "token_type": "bearer"}
+
+@app.post("/api/v1/auth/reset-password")
+def reset_password(payload: ResetPasswordIn, db: Session = Depends(get_db)):
+    token_hash = __import__("hashlib").sha256(payload.reset_token.encode("utf-8")).hexdigest()
+    grant = db.query(PasswordResetGrant).filter(PasswordResetGrant.token_hash == token_hash).first()
+    now = datetime.now(timezone.utc)
+    if not grant or grant.used_at is not None or grant.expires_at.replace(tzinfo=timezone.utc) < now:
+        raise HTTPException(status_code=400, detail="Reset token is invalid or expired. Request a new code.")
+    user = db.get(User, grant.user_id)
+    if not user:
+        raise HTTPException(status_code=400, detail="Reset token is invalid or expired. Request a new code.")
+    user.password_hash = pwd_context.hash(payload.new_password)
+    grant.used_at = now
+    db.commit()
+    return {"success": True, "message": "Password reset successfully. You can now log in."}
 
 @app.get("/api/v1/auth/me")
 def me(user: User = Depends(get_current_user)):

@@ -1,0 +1,35 @@
+name: SportIQ backend checks
+
+on:
+  pull_request:
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-check.yml"
+  push:
+    branches:
+      - main
+      - "feature/sportiq-backend-mvp"
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-check.yml"
+
+jobs:
+  import-check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Compile Python sources
+        run: python -m compileall -q app otp_router.py
+      - name: Import FastAPI application
+        env:
+          JWT_SECRET_KEY: "ci-only-secret-do-not-use-in-production"
+          DATABASE_URL: "sqlite:///./ci-sportiq.db"
+          PUBLIC_API_URL: "https://example.invalid"
+        run: python -c "from app.main import app; assert any(getattr(route, 'path', '') == '/health' for route in app.routes); print('SportIQ app imported; health route registered')"

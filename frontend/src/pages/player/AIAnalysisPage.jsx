@@ -27,6 +27,14 @@ export const AIAnalysisPage = () => {
 
   useEffect(() => {
     const loadAI = async () => {
+      if (import.meta.env.VITE_DEMO_MODE === 'true') {
+        setProfile(JSON.parse(localStorage.getItem('sportiq_demo_profile') || 'null'));
+        setLatestAI(null);
+        setHistoryAI([]);
+        setStats(null);
+        setLoading(false);
+        return;
+      }
       try {
         setLoading(true);
         const prof = await playerService.getMyProfile();

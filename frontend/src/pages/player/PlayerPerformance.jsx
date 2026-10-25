@@ -82,6 +82,15 @@ export const PlayerPerformance = () => {
 
   const handleAddLog = async (data) => {
     setSubmitting(true);
+    if (import.meta.env.VITE_DEMO_MODE === 'true') {
+      const saved = JSON.parse(localStorage.getItem('sportiq_demo_performance') || '[]');
+      const record = { ...data, id: `local-${Date.now()}`, assessment_date: new Date().toISOString(), source_type: 'USER_ENTERED', demo_only: true };
+      localStorage.setItem('sportiq_demo_performance', JSON.stringify([record, ...saved]));
+      setRecords([record, ...saved]);
+      setIsModalOpen(false);
+      setSubmitting(false);
+      return;
+    }
     try {
       const record = await performanceService.addRecord(data);
       if (profile?.id && record?.id) {

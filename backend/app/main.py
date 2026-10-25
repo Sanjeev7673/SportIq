@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import os
 import secrets
+import hashlib
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Literal
@@ -65,6 +66,15 @@ class PasswordResetGrant(Base):
     token_hash: Mapped[str] = mapped_column(String(64), unique=True, index=True)
     expires_at: Mapped[datetime] = mapped_column(DateTime)
     used_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+class ReportShare(Base):
+    __tablename__ = "report_shares"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    report_id: Mapped[int] = mapped_column(ForeignKey("performance_reports.id"), index=True)
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 class AthleteProfile(Base):
@@ -356,10 +366,44 @@ def report_qr(report_id: int, user: User = Depends(get_current_user), db: Sessio
     r = owned_report(report_id, user, db)
     public_base = os.getenv("PUBLIC_API_URL", "").rstrip("/")
     if not public_base: raise HTTPException(status_code=503, detail="Set PUBLIC_API_URL before generating shareable QR codes")
-    # QR points to an authenticated report endpoint for now; use a separate consent-based public share token before public sharing.
-    qr_path = QR_DIR / f"report_{r.id}_{user.id}.png"
-    qrcode.make(f"{public_base}/api/v1/reports/{r.id}").save(qr_path)
+    # Generating a QR is the user's explicit action to create a limited public share link.
+    # Only a redacted report summary is exposed; the uploaded video and private notes are excluded.
+    raw_token = secrets.token_urlsafe(32)
+    token_hash = hashlib.sha256(raw_token.encode("utf-8")).hexdigest()
+    now = datetime.now(timezone.utc)
+    share = ReportShare(report_id=r.id, token_hash=token_hash, expires_at=now + timedelta(days=7))
+    db.add(share)
+    db.commit()
+    qr_path = QR_DIR / f"report_{r.id}_{user.id}_{secrets.token_hex(4)}.png"
+    qrcode.make(f"{public_base}/api/v1/public/reports/{raw_token}").save(qr_path)
     return FileResponse(qr_path, media_type="image/png", filename=f"sportiq-report-{r.id}-qr.png")
+
+@app.get("/api/v1/public/reports/{share_token}")
+def get_public_shared_report(share_token: str, db: Session = Depends(get_db)):
+    token_hash = hashlib.sha256(share_token.encode("utf-8")).hexdigest()
+    share = db.query(ReportShare).filter(ReportShare.token_hash == token_hash).first()
+    now = datetime.now(timezone.utc)
+    if not share or share.revoked_at is not None or share.expires_at.replace(tzinfo=timezone.utc) < now:
+        raise HTTPException(status_code=404, detail="Shared report link is invalid or expired")
+    report = db.get(PerformanceReport, share.report_id)
+    if not report:
+        raise HTTPException(status_code=404, detail="Report not found")
+    athlete = db.get(User, report.athlete_id)
+    profile = db.query(AthleteProfile).filter(AthleteProfile.user_id == report.athlete_id).first()
+    return {
+        "success": True,
+        "report": {
+            "sport": report.sport,
+            "discipline": report.discipline,
+            "analysis_status": report.analysis_status,
+            "strengths": report.strengths,
+            "improvements": report.improvements,
+            "created_at": report.created_at.isoformat(),
+            "athlete_name": athlete.name if athlete else "Athlete",
+            "profile": {"age": profile.age, "height_cm": profile.height_cm, "weight_kg": profile.weight_kg} if profile else None,
+            "share_expires_at": share.expires_at.isoformat(),
+        },
+    }
 
 @app.get("/api/v1/coaches")
 def list_coaches(sport: str | None = None, location: str | None = None, db: Session = Depends(get_db)):

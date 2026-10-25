@@ -12,13 +12,13 @@ export const Card = ({
 }) => {
   return (
     <div
-      className={`bg-[#141716] border border-[#303632] rounded-2xl p-6 transition-all duration-200 ${
-        hover ? 'hover:border-[#505750] hover:bg-[#1b1f1d]/60 shadow-sm' : ''
+      className={`bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-6 transition-all duration-200 ${
+        hover ? 'hover:border-[var(--border-color)] hover:bg-[var(--bg-card-hover)] shadow-sm' : ''
       } ${className}`}
       {...props}
     >
       {(title || action || Icon) && (
-        <div className="flex items-center justify-between mb-5 pb-4 border-b border-[#303632]">
+        <div className="flex items-center justify-between mb-5 pb-4 border-b border-[var(--border-color)]">
           <div className="flex items-center gap-3">
             {Icon && (
               <div className="p-2.5 rounded-xl bg-[#ff251f]/10 text-[#ff251f] border border-[#ff251f]/20">
@@ -26,8 +26,8 @@ export const Card = ({
               </div>
             )}
             <div>
-              {title && <h3 className="text-base sm:text-lg font-bold text-[#f8f6f2] font-display tracking-tight">{title}</h3>}
-              {subtitle && <p className="text-xs text-[#b7b7b2] mt-0.5">{subtitle}</p>}
+              {title && <h3 className="text-base sm:text-lg font-bold text-[var(--text-primary)] font-display tracking-tight">{title}</h3>}
+              {subtitle && <p className="text-xs text-[var(--text-secondary)] mt-0.5">{subtitle}</p>}
             </div>
           </div>
           {action && <div>{action}</div>}

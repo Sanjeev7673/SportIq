@@ -12,17 +12,17 @@ export const Button = ({
   icon: Icon,
   ...props
 }) => {
-  const baseStyles = 'inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#0B1220] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-[0.98]';
+  const baseStyles = 'inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#090b0b] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-[0.98]';
 
   const variants = {
-    primary: 'bg-[#2563EB] hover:bg-[#1D4ED8] text-[#F8FAFC] focus:ring-[#2563EB] border border-[#2563EB]/40 shadow-sm',
-    ai: 'bg-[#06B6D4] hover:bg-[#0891B2] text-[#0B1220] font-bold focus:ring-[#06B6D4] border border-[#06B6D4]/50 shadow-sm',
-    secondary: 'bg-[#111C2E] hover:bg-[#16243B] text-[#F8FAFC] border border-[#1E293B] hover:border-[#334155] focus:ring-[#2563EB]',
+    primary: 'bg-[#ff251f] hover:bg-[#dc1e19] text-[#f8f6f2] focus:ring-[#ff251f] border border-[#ff251f]/40 shadow-sm',
+    ai: 'bg-[#ff6a4d] hover:bg-[#e6533a] text-[#090b0b] font-bold focus:ring-[#ff6a4d] border border-[#ff6a4d]/50 shadow-sm',
+    secondary: 'bg-[#141716] hover:bg-[#1b1f1d] text-[#f8f6f2] border border-[#303632] hover:border-[#505750] focus:ring-[#ff251f]',
     success: 'bg-[#22C55E] hover:bg-[#16A34A] text-white focus:ring-[#22C55E] border border-[#22C55E]/40',
     danger: 'bg-[#EF4444] hover:bg-[#DC2626] text-white focus:ring-[#EF4444] border border-[#EF4444]/40',
-    ghost: 'bg-transparent hover:bg-[#16243B] text-[#94A3B8] hover:text-[#F8FAFC] focus:ring-[#2563EB]',
-    outline: 'border border-[#2563EB] text-[#2563EB] hover:bg-[#2563EB]/10 focus:ring-[#2563EB]',
-    'ai-outline': 'border border-[#06B6D4] text-[#06B6D4] hover:bg-[#06B6D4]/10 focus:ring-[#06B6D4]',
+    ghost: 'bg-transparent hover:bg-[#1b1f1d] text-[#b7b7b2] hover:text-[#f8f6f2] focus:ring-[#ff251f]',
+    outline: 'border border-[#ff251f] text-[#ff251f] hover:bg-[#ff251f]/10 focus:ring-[#ff251f]',
+    'ai-outline': 'border border-[#ff6a4d] text-[#ff6a4d] hover:bg-[#ff6a4d]/10 focus:ring-[#ff6a4d]',
   };
 
   const sizes = {

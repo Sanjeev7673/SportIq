@@ -78,4 +78,10 @@ api.interceptors.response.use(
   }
 );
 
+// The health endpoint is mounted at /health, outside the /api/v1 router.
+export const wakeBackend = () => {
+  const baseUrl = (api.defaults.baseURL || PRODUCTION_API).replace(/\\/api\\/v1\\/?$/, '');
+  return fetch(`${baseUrl}/health`, { method: 'GET' }).catch(() => undefined);
+};
+
 export default api;

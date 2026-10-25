@@ -25,8 +25,8 @@ export const ThemeToggle = ({ className = '', size = 'md' }) => {
       title={isDark ? "Switch to light mode" : "Switch to dark mode"}
       className={`relative inline-flex items-center justify-center transition-all duration-200 border cursor-pointer ${
         isDark
-          ? 'bg-slate-800/80 text-amber-300 hover:text-amber-200 hover:bg-slate-700/80 border-slate-700 shadow-sm'
-          : 'bg-slate-100 text-slate-700 hover:text-slate-900 hover:bg-slate-200 border-slate-300 shadow-sm'
+          ? 'bg-[var(--bg-card)] text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)] border-[var(--border-color)] shadow-sm'
+          : 'bg-[var(--bg-card)] text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)] border-[var(--border-color)] shadow-sm'
       } ${sizeClasses[size] || sizeClasses.md} ${className}`}
     >
       {isDark ? (

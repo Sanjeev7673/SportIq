@@ -285,3 +285,101 @@ main {
 @media (pointer: coarse), (prefers-reduced-motion: reduce) {
   .sportiq-cursor-glow, .sportiq-cursor-dot, .sportiq-cursor-ripple { display: none !important; }
 }
+
+
+/* ==========================================================
+   SportIQ unified platform theme
+   Keeps public pages, authentication, dashboards, tables,
+   modals and forms on the same deep-navy visual system.
+   ========================================================== */
+:root {
+  --sportiq-bg: #0B1220;
+  --sportiq-card: #111C2E;
+  --sportiq-card-hover: #16243B;
+  --sportiq-surface: #0E1726;
+  --sportiq-border: #1E293B;
+  --sportiq-primary: #2563EB;
+  --sportiq-ai: #06B6D4;
+  --sportiq-text: #F8FAFC;
+  --sportiq-muted: #94A3B8;
+}
+
+html[data-theme="dark"] body {
+  background-color: #0B1220;
+  color: #F8FAFC;
+}
+
+/* Normalize common Tailwind surfaces that otherwise stay bright on some routes. */
+html[data-theme="dark"] [class~="bg-white"],
+html[data-theme="dark"] [class~="bg-gray-50"],
+html[data-theme="dark"] [class~="bg-slate-50"],
+html[data-theme="dark"] [class~="bg-gray-100"],
+html[data-theme="dark"] [class~="bg-slate-100"] {
+  background-color: #111C2E !important;
+}
+
+html[data-theme="dark"] [class~="text-gray-900"],
+html[data-theme="dark"] [class~="text-gray-800"],
+html[data-theme="dark"] [class~="text-slate-900"],
+html[data-theme="dark"] [class~="text-slate-800"] {
+  color: #F8FAFC !important;
+}
+
+html[data-theme="dark"] [class~="text-gray-700"],
+html[data-theme="dark"] [class~="text-gray-600"],
+html[data-theme="dark"] [class~="text-gray-500"],
+html[data-theme="dark"] [class~="text-slate-700"],
+html[data-theme="dark"] [class~="text-slate-600"],
+html[data-theme="dark"] [class~="text-slate-500"] {
+  color: #94A3B8 !important;
+}
+
+html[data-theme="dark"] [class~="border-gray-100"],
+html[data-theme="dark"] [class~="border-gray-200"],
+html[data-theme="dark"] [class~="border-slate-100"],
+html[data-theme="dark"] [class~="border-slate-200"] {
+  border-color: #1E293B !important;
+}
+
+/* Consistent form controls across sign-in, registration, settings and modals. */
+html[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]),
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] select {
+  color: #F8FAFC;
+  background-color: #111C2E;
+  border-color: #1E293B;
+}
+
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder {
+  color: #64748B;
+}
+
+html[data-theme="dark"] input:focus,
+html[data-theme="dark"] textarea:focus,
+html[data-theme="dark"] select:focus {
+  border-color: #2563EB;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, .18);
+}
+
+/* Shared visual language for panels, tables, popovers and dialogs. */
+html[data-theme="dark"] table thead,
+html[data-theme="dark"] [role="dialog"],
+html[data-theme="dark"] .modal,
+html[data-theme="dark"] .dropdown-menu {
+  background-color: #111C2E;
+  border-color: #1E293B;
+}
+
+html[data-theme="dark"] hr {
+  border-color: #1E293B;
+}
+
+html[data-theme="dark"] a:not([class~="text-white"]) {
+  text-underline-offset: 3px;
+}
+
+html[data-theme="dark"] ::selection {
+  color: #F8FAFC;
+  background: rgba(37, 99, 235, .42);
+}

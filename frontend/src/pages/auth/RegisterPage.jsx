@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Activity, Lock, Mail, User, Smartphone, AlertCircle } from 'lucide-react';
@@ -8,9 +8,13 @@ import Select from '../../components/common/Select';
 import Button from '../../components/common/Button';
 import ThemeToggle from '../../components/common/ThemeToggle';
 import { USER_ROLES } from '../../utils/constants';
+import api from '../../services/api';
 
 export const RegisterPage = () => {
   const { register } = useAuth();
+
+  // Wake a sleeping free-tier API while the user fills in the form.
+  useEffect(() => { api.get('/health').catch(() => {}); }, []);
   const navigate = useNavigate();
 
   const [regMethod, setRegMethod] = useState('email'); // 'email' or 'phone'
@@ -24,6 +28,7 @@ export const RegisterPage = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const roleOptions = [
     { value: USER_ROLES.PLAYER, label: 'Athlete / Player' },
@@ -35,6 +40,7 @@ export const RegisterPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
 
     // Password confirmation check
     if (formData.password !== formData.confirm_password) {
@@ -73,6 +79,7 @@ export const RegisterPage = () => {
       }
 
       const res = await register(payload);
+      setSuccess('Account created successfully. Opening your SportIQ workspace…');
       const role = res.user?.role;
       if (role === 'PLAYER') navigate('/player/profile');
       else if (role === 'COACH') navigate('/coach/dashboard');
@@ -81,7 +88,7 @@ export const RegisterPage = () => {
       else if (role === 'ADMIN') navigate('/admin/dashboard');
       else navigate('/');
     } catch (err) {
-      setError(err.message || 'Registration failed');
+      setError(err.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -110,6 +117,9 @@ export const RegisterPage = () => {
 
         {/* Card */}
         <Card className="border-[var(--border-color)] bg-[var(--bg-card)]">
+          {success && (
+            <div role="status" className="flex items-center gap-2 p-3 mb-5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 text-xs font-semibold">{success}</div>
+          )}
           {error && (
             <div className="flex items-center gap-2 p-3 mb-5 rounded-xl bg-[#EF4444]/10 border border-[#EF4444]/30 text-[#EF4444] text-xs font-medium">
               <AlertCircle className="w-4 h-4 shrink-0" />

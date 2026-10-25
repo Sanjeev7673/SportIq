@@ -9,6 +9,7 @@ import ThemeToggle from '../../components/common/ThemeToggle';
 import ForgotPasswordModal from '../../components/auth/ForgotPasswordModal';
 import { wakeBackend } from '../../services/api';
 
+// Review preview: demo authentication is enabled only for the review-ready-demo branch environment.
 export const LoginPage = () => {
   const { login } = useAuth();
 

@@ -37,6 +37,16 @@ export const PlayerProfile = () => {
 
   useEffect(() => {
     const loadProfile = async () => {
+      if (import.meta.env.VITE_DEMO_MODE === 'true') {
+        const saved = JSON.parse(localStorage.getItem('sportiq_demo_profile') || 'null');
+        if (saved) {
+          setProfile(saved);
+          setFormData((prev) => ({ ...prev, ...saved }));
+          if (saved.profile_image) setPreviewUrl(saved.profile_image);
+        }
+        setLoading(false);
+        return;
+      }
       try {
         setLoading(true);
         const data = await playerService.getMyProfile();
@@ -121,6 +131,15 @@ export const PlayerProfile = () => {
     setSaving(true);
     setMessage('');
     setError('');
+
+    if (import.meta.env.VITE_DEMO_MODE === 'true') {
+      const saved = { ...formData, id: profile?.id || 'local-demo-profile', profile_image: formData.profile_image || previewUrl || '' };
+      localStorage.setItem('sportiq_demo_profile', JSON.stringify(saved));
+      setProfile(saved);
+      setMessage('Profile saved on this demo device. It has not been sent to a server.');
+      setSaving(false);
+      return;
+    }
 
     try {
       if (profile) {

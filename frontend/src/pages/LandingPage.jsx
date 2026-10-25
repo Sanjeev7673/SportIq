@@ -20,6 +20,26 @@ export default function LandingPage(){
  const move=d=>setActive(v=>(v+d+slides.length)%slides.length);const close=()=>setMenuOpen(false);
  return <main className="sportiq-cinema">
  <section className="sq-hero"><img key={slide.image} className="sq-hero-image" src={slide.image} alt="Athlete training at golden hour"/>
+ <div className="sq-motion-scene" aria-hidden="true">
+   <div className="sq-runner-glow"></div>
+   <svg className="sq-runner" viewBox="0 0 220 300" role="presentation">
+    <g className="sq-runner-body">
+     <circle cx="112" cy="37" r="18" fill="#f8f6f2"/>
+     <path d="M101 59 Q116 52 128 64 L143 113 L119 135 L91 111 Z" fill="#ff251f"/>
+     <path d="M102 66 L77 91 L57 119" fill="none" stroke="#f8f6f2" strokeWidth="13" strokeLinecap="round" strokeLinejoin="round" className="sq-arm-back"/>
+     <path d="M125 68 L151 86 L170 69" fill="none" stroke="#f8f6f2" strokeWidth="13" strokeLinecap="round" strokeLinejoin="round" className="sq-arm-front"/>
+     <path d="M117 128 L91 173 L55 204" fill="none" stroke="#f8f6f2" strokeWidth="17" strokeLinecap="round" strokeLinejoin="round" className="sq-leg-back"/>
+     <path d="M119 128 L145 169 L177 190" fill="none" stroke="#f8f6f2" strokeWidth="17" strokeLinecap="round" strokeLinejoin="round" className="sq-leg-front"/>
+     <path d="M53 204 L30 207" fill="none" stroke="#ff251f" strokeWidth="12" strokeLinecap="round"/>
+     <path d="M177 190 L197 184" fill="none" stroke="#ff251f" strokeWidth="12" strokeLinecap="round"/>
+    </g>
+   </svg>
+   <div className="sq-motion-trail"></div>
+   <div className="sq-live-tag"><i></i> LIVE MOVEMENT ANALYSIS</div>
+   <div className="sq-data-card sq-data-top"><span>POSE DETECTION</span><strong>ACTIVE</strong><div className="sq-skeleton-bars"><i/><i/><i/><i/><i/><i/><i/></div></div>
+   <div className="sq-data-card sq-data-bottom"><span>RUNNING FORM</span><strong>87<small>/100</small></strong><div className="sq-data-meter"><i/></div><em>STRIDE · BALANCE · SPEED</em></div>
+   <div className="sq-scan-line"></div>
+ </div>
  <header className="sq-header"><Link to="/" className="sq-brand">SPORTIQ<small>PERFORMANCE / {slide.n}</small></Link><div className="sq-header-right"><span className="sq-mono">SOUND OFF</span><button className="sq-menu" onClick={()=>setMenuOpen(true)} aria-label="Open navigation"><span className="sq-menu-lines"><i/><i/></span><span className="sq-mono">MENU</span></button></div></header>
  <div className="sq-location sq-mono">{slide.label}</div><div className="sq-hero-content" key={slide.n+'copy'}><div className="sq-kicker">{slide.kicker}</div><h1 className="sq-display">{slide.title}</h1><p className="sq-hero-copy">{slide.line}</p><div className="sq-hero-actions"><Link to="/register" className="sq-primary">Enter SportIQ <ArrowUpRight size={14}/></Link><a href="#intelligence" className="sq-secondary"><Play size={13}/> Explore the platform</a></div></div>
  <a href="#intelligence" className="sq-scroll"><span>SCROLL</span><ArrowDown size={13}/></a><div className="sq-hero-bottom"><p>{slide.line}</p><span className="sq-mono">AI / MOVEMENT / POTENTIAL</span></div><div className="sq-slider"><span className="sq-slider-count"><b>{slide.n}</b> / 03</span><button onClick={()=>move(-1)} aria-label="Previous slide"><ArrowRight className="sq-prev" size={14}/></button><button onClick={()=>move(1)} aria-label="Next slide"><ArrowRight size={14}/></button></div></section>

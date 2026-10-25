@@ -86,9 +86,9 @@ export const LoginPage = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input
-              label="Email or Mobile Phone Number"
-              type="text"
-              placeholder="athlete@sportiq.ai or 9876543210"
+              label="Email address"
+              type="email"
+              placeholder="athlete@example.com"
               required
               icon={User}
               value={identifier}

@@ -106,14 +106,14 @@ export const Sidebar = ({ isOpen, onClose }) => {
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed top-16 bottom-0 left-0 z-40 w-64 border-r border-[#1E293B] bg-[#0B1220] p-4 transition-transform duration-300 lg:translate-x-0 flex flex-col justify-between overflow-y-auto ${
+        className={`fixed top-16 bottom-0 left-0 z-40 w-64 border-r border-[var(--border-color)] bg-[var(--bg-main)] p-4 transition-transform duration-300 lg:translate-x-0 flex flex-col justify-between overflow-y-auto ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <div>
           <div className="flex items-center justify-between px-3 py-2 mb-2 lg:hidden">
             <span className="text-xs font-semibold uppercase tracking-wider text-[#94A3B8]">Navigation</span>
-            <button onClick={onClose} aria-label="Close sidebar" className="p-1 text-[#94A3B8] hover:text-[#F8FAFC]">
+            <button onClick={onClose} aria-label="Close sidebar" className="p-1 text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -139,7 +139,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
                         ? item.isAI
                           ? 'bg-[#06B6D4]/15 text-[#06B6D4] border border-[#06B6D4]/30 font-semibold'
                           : 'bg-[#2563EB] text-[#F8FAFC] font-semibold shadow-sm'
-                        : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#111C2E]'
+                        : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[var(--bg-card)]'
                     }`
                   }
                 >

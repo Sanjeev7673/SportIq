@@ -3,7 +3,7 @@
 This folder contains a reusable FastAPI router for email and SMS OTP verification using Twilio Verify.
 
 ## Current status
-The main repository does not contain the existing FastAPI backend. The router is not live until it is mounted into that backend, deployed, and configured with provider credentials. Frontend service methods now call /api/v1/otp/send and /api/v1/otp/verify, but these requests will fail until the backend routes are deployed.
+The FastAPI backend now mounts this router at /api/v1/otp. Live delivery still requires Twilio Verify credentials and an email integration plus SMS channel. Verify registration and password-reset end to end after configuring the provider.
 
 ## Provider configuration
 1. Create a Twilio Verify Service.
@@ -29,4 +29,4 @@ Verify: { "purpose": "forgot_password", "channel": "sms", "destination": "+14155
 - If product policy requires both email and SMS to be verified, enforce both server-side. The current router verifies one destination per request.
 - Test actual email/SMS delivery plus invalid, expired, and rate-limited codes. Twilio trial accounts may send only to verified destinations.
 
-Live delivery and end-to-end registration/reset are not verified because the backend source and provider credentials are not available in this repository.
+Live delivery has not been tested; it requires real provider credentials. The reset token is returned only after successful OTP verification and expires after 10 minutes. Add rate limiting, resend cooldowns, and monitoring before production.

@@ -82,14 +82,28 @@ export const PlayerDashboard = () => {
   const handleLogSubmit = async (data) => {
     setSubmittingLog(true);
     try {
+      if (import.meta.env.VITE_DEMO_MODE === 'true') {
+        const saved = JSON.parse(localStorage.getItem('sportiq_demo_performance') || '[]');
+        const record = {
+          ...data,
+          id: `local-${Date.now()}`,
+          assessment_date: new Date().toISOString(),
+          source_type: 'USER_ENTERED',
+          demo_only: true,
+        };
+        localStorage.setItem('sportiq_demo_performance', JSON.stringify([record, ...saved]));
+        setHistory((current) => [record, ...current]);
+        setIsLogModalOpen(false);
+        return;
+      }
+
       const record = await performanceService.addRecord(data);
-      if (profile?.id && record?.id) {
-        // Trigger AI predict and save
+      if (profile?.id && record?.id && profile?.age && profile?.sport) {
         await aiService.predictTalent({
           ...data,
-          age: profile.age || 20,
+          age: profile.age,
           sport: profile.sport,
-          position: profile.position || 'Forward',
+          position: profile.position || undefined,
           player_id: profile.id,
           performance_id: record.id
         });

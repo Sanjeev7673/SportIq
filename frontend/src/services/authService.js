@@ -38,7 +38,7 @@ export const authService = {
   },
 
   async register(data) {
-    return persistSession(await api.post('/auth/register', data));
+    return unwrap(await api.post('/auth/register', data));
   },
 
   async login(data) {

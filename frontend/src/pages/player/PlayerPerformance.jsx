@@ -37,6 +37,15 @@ export const PlayerPerformance = () => {
   const [videoModalUrl, setVideoModalUrl] = useState(null);
 
   const loadData = async () => {
+    if (import.meta.env.VITE_DEMO_MODE === 'true') {
+      const saved = JSON.parse(localStorage.getItem('sportiq_demo_performance') || '[]');
+      setProfile(JSON.parse(localStorage.getItem('sportiq_demo_profile') || 'null'));
+      setRecords(saved);
+      setStats(null);
+      setOfflineCount(0);
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
       const prof = await playerService.getMyProfile();

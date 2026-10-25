@@ -88,7 +88,7 @@ export const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B1220] text-[#F8FAFC] flex flex-col items-center justify-center p-4 radial-bg relative transition-colors duration-200">
+    <div className="min-h-screen bg-[#090b0b] text-[#f8f6f2] flex flex-col items-center justify-center p-4 radial-bg relative transition-colors duration-200">
       {/* Top Bar Theme Toggle */}
       <div className="absolute top-4 right-4">
         <ThemeToggle size="sm" />
@@ -98,18 +98,18 @@ export const RegisterPage = () => {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-2.5 mb-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#2563EB] shadow-sm">
-              <Activity className="h-6 w-6 text-[#F8FAFC]" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#ff251f] shadow-sm">
+              <Activity className="h-6 w-6 text-[#f8f6f2]" />
             </div>
-            <span className="font-display text-2xl font-bold tracking-tight text-[#F8FAFC]">
-              Sport<span className="text-[#06B6D4]">IQ</span>
+            <span className="font-display text-2xl font-bold tracking-tight text-[#f8f6f2]">
+              Sport<span className="text-[#ff6a4d]">IQ</span>
             </span>
           </Link>
-          <p className="text-xs text-[#94A3B8]">Create your athletic intelligence account</p>
+          <p className="text-xs text-[#b7b7b2]">Create your athletic intelligence account</p>
         </div>
 
         {/* Card */}
-        <Card className="border-[#1E293B] bg-[#111C2E]">
+        <Card className="border-[#303632] bg-[#141716]">
           {error && (
             <div className="flex items-center gap-2 p-3 mb-5 rounded-xl bg-[#EF4444]/10 border border-[#EF4444]/30 text-[#EF4444] text-xs font-medium">
               <AlertCircle className="w-4 h-4 shrink-0" />
@@ -119,10 +119,10 @@ export const RegisterPage = () => {
 
           {/* Registration Method Toggle */}
           <div className="mb-5">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[#94A3B8] mb-2">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-[#b7b7b2] mb-2">
               Registration Method
             </label>
-            <div className="grid grid-cols-2 gap-2 p-1 bg-[#0B1220] border border-[#1E293B] rounded-xl">
+            <div className="grid grid-cols-2 gap-2 p-1 bg-[#090b0b] border border-[#303632] rounded-xl">
               <button
                 type="button"
                 onClick={() => {
@@ -131,8 +131,8 @@ export const RegisterPage = () => {
                 }}
                 className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   regMethod === 'email'
-                    ? 'bg-[#111C2E] text-[#2563EB] border border-[#2563EB]/40 shadow-sm'
-                    : 'text-[#94A3B8] hover:text-[#F8FAFC]'
+                    ? 'bg-[#141716] text-[#ff251f] border border-[#ff251f]/40 shadow-sm'
+                    : 'text-[#b7b7b2] hover:text-[#f8f6f2]'
                 }`}
               >
                 <Mail className="w-3.5 h-3.5" />
@@ -147,8 +147,8 @@ export const RegisterPage = () => {
                 }}
                 className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   regMethod === 'phone'
-                    ? 'bg-[#111C2E] text-[#2563EB] border border-[#2563EB]/40 shadow-sm'
-                    : 'text-[#94A3B8] hover:text-[#F8FAFC]'
+                    ? 'bg-[#141716] text-[#ff251f] border border-[#ff251f]/40 shadow-sm'
+                    : 'text-[#b7b7b2] hover:text-[#f8f6f2]'
                 }`}
               >
                 <Smartphone className="w-3.5 h-3.5" />
@@ -180,23 +180,23 @@ export const RegisterPage = () => {
               />
             ) : (
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#94A3B8] mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#b7b7b2] mb-1.5">
                   Indian Mobile Number
                 </label>
                 <div className="relative rounded-xl flex items-center">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#94A3B8] font-semibold text-xs">
-                    <span className="text-[#2563EB] font-bold mr-1">🇮🇳 +91</span>
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#b7b7b2] font-semibold text-xs">
+                    <span className="text-[#ff251f] font-bold mr-1">🇮🇳 +91</span>
                   </div>
                   <input
                     type="tel"
                     placeholder="98765 43210"
                     required
-                    className="block w-full rounded-xl bg-[#111C2E] border border-[#1E293B] text-[#F8FAFC] placeholder-[#94A3B8]/60 focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] text-sm pl-20 pr-3.5 py-2.5 transition-all duration-200"
+                    className="block w-full rounded-xl bg-[#141716] border border-[#303632] text-[#f8f6f2] placeholder-[#b7b7b2]/60 focus:outline-none focus:ring-2 focus:ring-[#ff251f] focus:border-[#ff251f] text-sm pl-20 pr-3.5 py-2.5 transition-all duration-200"
                     value={formData.phone_number}
                     onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
                   />
                 </div>
-                <p className="text-[11px] text-[#94A3B8]/80 mt-1">Accepts standard 10-digit mobile numbers.</p>
+                <p className="text-[11px] text-[#b7b7b2]/80 mt-1">Accepts standard 10-digit mobile numbers.</p>
               </div>
             )}
 
@@ -240,9 +240,9 @@ export const RegisterPage = () => {
             </Button>
           </form>
 
-          <div className="mt-6 pt-5 border-t border-[#1E293B] text-center text-xs text-[#94A3B8]">
+          <div className="mt-6 pt-5 border-t border-[#303632] text-center text-xs text-[#b7b7b2]">
             Already have an account?{' '}
-            <Link to="/login" className="text-[#2563EB] hover:text-[#3B82F6] font-semibold">
+            <Link to="/login" className="text-[#ff251f] hover:text-[#3B82F6] font-semibold">
               Sign in
             </Link>
           </div>

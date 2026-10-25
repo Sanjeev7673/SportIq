@@ -19,27 +19,8 @@ export default function LandingPage(){
  useEffect(()=>{const t=window.setInterval(()=>setActive(v=>(v+1)%slides.length),7500);return()=>window.clearInterval(t);},[]);
  const move=d=>setActive(v=>(v+d+slides.length)%slides.length);const close=()=>setMenuOpen(false);
  return <main className="sportiq-cinema">
- <section className="sq-hero"><img key={slide.image} className="sq-hero-image" src={slide.image} alt="Athlete training at golden hour"/>
- <div className="sq-motion-scene" aria-hidden="true">
-   <div className="sq-runner-glow"></div>
-   <svg className="sq-runner" viewBox="0 0 220 300" role="presentation">
-    <g className="sq-runner-shadow"><ellipse cx="112" cy="262" rx="66" ry="8" fill="#ff251f" opacity=".2"/></g>
-    <g className="sq-runner-limb sq-arm-back"><path d="M105 78 L80 102 L64 127" fill="none" stroke="#d9d7d2" strokeWidth="13" strokeLinecap="round" strokeLinejoin="round"/><path d="M64 127 L56 139" fill="none" stroke="#ff251f" strokeWidth="11" strokeLinecap="round"/></g>
-    <g className="sq-runner-limb sq-leg-back"><path d="M111 132 L86 179 L54 218" fill="none" stroke="#c9c7c1" strokeWidth="18" strokeLinecap="round" strokeLinejoin="round"/><path d="M54 218 L29 220" fill="none" stroke="#ff251f" strokeWidth="12" strokeLinecap="round"/></g>
-    <g className="sq-runner-core">
-     <circle cx="117" cy="38" r="18" fill="#f8f6f2"/>
-     <path d="M105 59 Q120 53 132 65 L145 112 L119 137 L91 111 Z" fill="#ff251f"/>
-     <path d="M105 68 L119 72 L129 105 L116 112 L101 91 Z" fill="#d91c18" opacity=".8"/>
-    </g>
-    <g className="sq-runner-limb sq-arm-front"><path d="M128 70 L151 89 L174 74" fill="none" stroke="#f8f6f2" strokeWidth="13" strokeLinecap="round" strokeLinejoin="round"/><path d="M174 74 L181 63" fill="none" stroke="#ff251f" strokeWidth="10" strokeLinecap="round"/></g>
-    <g className="sq-runner-limb sq-leg-front"><path d="M120 132 L148 169 L177 197" fill="none" stroke="#f8f6f2" strokeWidth="18" strokeLinecap="round" strokeLinejoin="round"/><path d="M177 197 L200 190" fill="none" stroke="#ff251f" strokeWidth="12" strokeLinecap="round"/></g>
-   </svg>
-   <div className="sq-motion-trail"></div>
-   <div className="sq-live-tag"><i></i> LIVE MOVEMENT ANALYSIS</div>
-   <div className="sq-data-card sq-data-top"><span>POSE DETECTION</span><strong>ACTIVE</strong><div className="sq-skeleton-bars"><i/><i/><i/><i/><i/><i/><i/></div></div>
-   <div className="sq-data-card sq-data-bottom"><span>RUNNING FORM</span><strong>87<small>/100</small></strong><div className="sq-data-meter"><i/></div><em>STRIDE · BALANCE · SPEED</em></div>
-   <div className="sq-scan-line"></div>
- </div>
+ <section className="sq-hero"><img key={slide.image} className="sq-hero-image" src={slide.image} alt="" aria-hidden="true"/><video className="sq-hero-video" autoPlay muted loop playsInline preload="metadata" poster={slide.image} aria-hidden="true"><source src="/videos/sportiq-running.mp4" type="video/mp4"/> </video>
+
  <header className="sq-header"><Link to="/" className="sq-brand">SPORTIQ<small>PERFORMANCE / {slide.n}</small></Link><div className="sq-header-right"><span className="sq-mono">SOUND OFF</span><button className="sq-menu" onClick={()=>setMenuOpen(true)} aria-label="Open navigation"><span className="sq-menu-lines"><i/><i/></span><span className="sq-mono">MENU</span></button></div></header>
  <div className="sq-location sq-mono">{slide.label}</div><div className="sq-hero-content" key={slide.n+'copy'}><div className="sq-kicker">{slide.kicker}</div><h1 className="sq-display">{slide.title}</h1><p className="sq-hero-copy">{slide.line}</p><div className="sq-hero-actions"><Link to="/register" className="sq-primary">Enter SportIQ <ArrowUpRight size={14}/></Link><a href="#intelligence" className="sq-secondary"><Play size={13}/> Explore the platform</a></div></div>
  <a href="#intelligence" className="sq-scroll"><span>SCROLL</span><ArrowDown size={13}/></a><div className="sq-hero-bottom"><p>{slide.line}</p><span className="sq-mono">AI / MOVEMENT / POTENTIAL</span></div><div className="sq-slider"><span className="sq-slider-count"><b>{slide.n}</b> / 03</span><button onClick={()=>move(-1)} aria-label="Previous slide"><ArrowRight className="sq-prev" size={14}/></button><button onClick={()=>move(1)} aria-label="Next slide"><ArrowRight size={14}/></button></div></section>

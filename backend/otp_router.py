@@ -137,14 +137,20 @@ def verify_otp(payload: VerifyOTPRequest):
     from app.main import SessionLocal, User, PasswordResetGrant
     db = SessionLocal()
     try:
-        if payload.purpose == "registration" and payload.channel == "email":
-            user = db.query(User).filter(User.email == destination.lower()).first()
+        lookup_value = destination.lower() if payload.channel == "email" else destination
+        lookup_column = User.email if payload.channel == "email" else User.phone
+        user = db.query(User).filter(lookup_column == lookup_value).first()
+        if payload.purpose == "registration":
             if user:
-                user.email_verified = True
+                if payload.channel == "email":
+                    user.email_verified = True
+                else:
+                    user.phone_verified = True
                 db.commit()
-                response["message"] = "Email verified. You can now log in."
-        elif payload.purpose == "forgot_password" and payload.channel == "email":
-            user = db.query(User).filter(User.email == destination.lower()).first()
+                response["message"] = f"{payload.channel.capitalize()} verified."
+            else:
+                response["message"] = "Code verified, but no account is registered with that destination."
+        elif payload.purpose == "forgot_password":
             if user:
                 raw_token = secrets.token_urlsafe(32)
                 token_hash = hashlib.sha256(raw_token.encode("utf-8")).hexdigest()
@@ -158,8 +164,8 @@ def verify_otp(payload: VerifyOTPRequest):
                 db.commit()
                 response["reset_token"] = raw_token
                 response["message"] = "Code verified. Use the reset token to set a new password within 10 minutes."
-        else:
-            response["message"] = "Code verified. This channel is not yet connected to an account recovery action."
+            else:
+                response["message"] = "Code verified. If an account matches this destination, reset instructions will be available."
         return response
     finally:
         db.close()

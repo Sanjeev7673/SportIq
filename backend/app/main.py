@@ -139,6 +139,19 @@ class Booking(Base):
 
 Base.metadata.create_all(bind=engine)
 
+# Small compatibility migration for an existing SQLite/PostgreSQL database. New deployments
+# create these fields from the model above; duplicate-column errors are intentionally ignored.
+with engine.begin() as connection:
+    for migration in (
+        "ALTER TABLE users ADD COLUMN email_verified BOOLEAN NOT NULL DEFAULT FALSE",
+        "ALTER TABLE users ADD COLUMN phone VARCHAR(20)",
+        "ALTER TABLE users ADD COLUMN phone_verified BOOLEAN NOT NULL DEFAULT FALSE",
+    ):
+        try:
+            connection.exec_driver_sql(migration)
+        except Exception:
+            pass
+
 app = FastAPI(title="SportIQ API", version="0.1.0", description="Athlete development and sports networking platform API")
 origins = [x.strip() for x in os.getenv("BACKEND_CORS_ORIGINS", "http://localhost:5173,http://localhost:3000,https://sportiq-theta.vercel.app").split(",") if x.strip()]
 app.add_middleware(CORSMiddleware, allow_origins=origins, allow_origin_regex=r"^https://.*\.vercel\.app$", allow_credentials=True, allow_methods=["*"], allow_headers=["*"])

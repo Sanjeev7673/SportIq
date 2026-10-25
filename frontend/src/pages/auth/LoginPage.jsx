@@ -67,6 +67,7 @@ export const LoginPage = () => {
             </span>
           </Link>
           <p className="text-xs text-[var(--text-secondary)]">Sign in to your sports analytics workspace</p>
+          {import.meta.env.VITE_DEMO_MODE === 'true' && <div role="status" className="mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-left text-xs leading-5 text-amber-700">Preview mode: use any email and password to explore the player dashboard. This does not create or authenticate a real account. Video AI and backend-connected features are not active in this preview.</div>}
         </div>
 
         {/* Card */}

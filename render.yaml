@@ -5,16 +5,19 @@ services:
     rootDir: backend
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.5
       - key: ENVIRONMENT
         value: production
-      - key: PROJECT_NAME
-        value: "SportIQ AI Talent Platform"
-      - key: ALGORITHM
-        value: HS256
       - key: ACCESS_TOKEN_EXPIRE_MINUTES
-        value: 10080
+        value: "10080"
       - key: BACKEND_CORS_ORIGINS
-        value: "https://sportiq.vercel.app,http://localhost:3000,http://127.0.0.1:3000"
+        value: "https://sportiq-theta.vercel.app,https://sportiq.vercel.app,http://localhost:5173"
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USE_TLS
+        value: "true"
+      - key: SMTP_USE_SSL
+        value: "false"

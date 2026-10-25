@@ -23,16 +23,16 @@ export default function LandingPage(){
  <div className="sq-motion-scene" aria-hidden="true">
    <div className="sq-runner-glow"></div>
    <svg className="sq-runner" viewBox="0 0 220 300" role="presentation">
-    <g className="sq-runner-body">
-     <circle cx="112" cy="37" r="18" fill="#f8f6f2"/>
-     <path d="M101 59 Q116 52 128 64 L143 113 L119 135 L91 111 Z" fill="#ff251f"/>
-     <path d="M102 66 L77 91 L57 119" fill="none" stroke="#f8f6f2" strokeWidth="13" strokeLinecap="round" strokeLinejoin="round" className="sq-arm-back"/>
-     <path d="M125 68 L151 86 L170 69" fill="none" stroke="#f8f6f2" strokeWidth="13" strokeLinecap="round" strokeLinejoin="round" className="sq-arm-front"/>
-     <path d="M117 128 L91 173 L55 204" fill="none" stroke="#f8f6f2" strokeWidth="17" strokeLinecap="round" strokeLinejoin="round" className="sq-leg-back"/>
-     <path d="M119 128 L145 169 L177 190" fill="none" stroke="#f8f6f2" strokeWidth="17" strokeLinecap="round" strokeLinejoin="round" className="sq-leg-front"/>
-     <path d="M53 204 L30 207" fill="none" stroke="#ff251f" strokeWidth="12" strokeLinecap="round"/>
-     <path d="M177 190 L197 184" fill="none" stroke="#ff251f" strokeWidth="12" strokeLinecap="round"/>
+    <g className="sq-runner-shadow"><ellipse cx="112" cy="262" rx="66" ry="8" fill="#ff251f" opacity=".2"/></g>
+    <g className="sq-runner-limb sq-arm-back"><path d="M105 78 L80 102 L64 127" fill="none" stroke="#d9d7d2" strokeWidth="13" strokeLinecap="round" strokeLinejoin="round"/><path d="M64 127 L56 139" fill="none" stroke="#ff251f" strokeWidth="11" strokeLinecap="round"/></g>
+    <g className="sq-runner-limb sq-leg-back"><path d="M111 132 L86 179 L54 218" fill="none" stroke="#c9c7c1" strokeWidth="18" strokeLinecap="round" strokeLinejoin="round"/><path d="M54 218 L29 220" fill="none" stroke="#ff251f" strokeWidth="12" strokeLinecap="round"/></g>
+    <g className="sq-runner-core">
+     <circle cx="117" cy="38" r="18" fill="#f8f6f2"/>
+     <path d="M105 59 Q120 53 132 65 L145 112 L119 137 L91 111 Z" fill="#ff251f"/>
+     <path d="M105 68 L119 72 L129 105 L116 112 L101 91 Z" fill="#d91c18" opacity=".8"/>
     </g>
+    <g className="sq-runner-limb sq-arm-front"><path d="M128 70 L151 89 L174 74" fill="none" stroke="#f8f6f2" strokeWidth="13" strokeLinecap="round" strokeLinejoin="round"/><path d="M174 74 L181 63" fill="none" stroke="#ff251f" strokeWidth="10" strokeLinecap="round"/></g>
+    <g className="sq-runner-limb sq-leg-front"><path d="M120 132 L148 169 L177 197" fill="none" stroke="#f8f6f2" strokeWidth="18" strokeLinecap="round" strokeLinejoin="round"/><path d="M177 197 L200 190" fill="none" stroke="#ff251f" strokeWidth="12" strokeLinecap="round"/></g>
    </svg>
    <div className="sq-motion-trail"></div>
    <div className="sq-live-tag"><i></i> LIVE MOVEMENT ANALYSIS</div>

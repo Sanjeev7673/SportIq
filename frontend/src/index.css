@@ -426,3 +426,90 @@ input:focus, textarea:focus, select:focus { box-shadow: 0 0 0 3px rgba(247,22,1,
 [class*="bg-blue-"], [class*="bg-cyan-"] { background-color: #F71601 !important; }
 [class*="border-[#2563EB]"], [class*="border-[#06B6D4]"],
 [class*="border-blue-"], [class*="border-cyan-"] { border-color: #F71601 !important; }
+
+
+/* Final cross-route theme enforcement: apply the club palette even when a
+   user has an old saved light-theme preference or a legacy utility class. */
+html[data-theme="light"],
+html[data-theme="dark"] {
+  color-scheme: dark;
+  background: #090808;
+}
+html[data-theme="light"] body,
+html[data-theme="dark"] body {
+  background-color: #090808 !important;
+  color: #ECEBEC !important;
+}
+html[data-theme="light"] .light,
+html[data-theme="dark"] .light {
+  --bg-main: #090808;
+  --bg-card: #171616;
+  --bg-card-hover: #242222;
+  --bg-surface: #101010;
+  --text-primary: #ECEBEC;
+  --text-secondary: #AFAFAF;
+  --text-muted: #777373;
+  --border-color: #343131;
+  --input-bg: #171616;
+  --input-border: #343131;
+  color-scheme: dark;
+}
+html[data-theme="light"] [class~="bg-white"],
+html[data-theme="light"] [class~="bg-gray-50"],
+html[data-theme="light"] [class~="bg-slate-50"],
+html[data-theme="light"] [class~="bg-gray-100"],
+html[data-theme="light"] [class~="bg-slate-100"],
+html[data-theme="dark"] [class~="bg-white"],
+html[data-theme="dark"] [class~="bg-gray-50"],
+html[data-theme="dark"] [class~="bg-slate-50"],
+html[data-theme="dark"] [class~="bg-gray-100"],
+html[data-theme="dark"] [class~="bg-slate-100"] {
+  background-color: #171616 !important;
+}
+html[data-theme="light"] [class~="text-gray-900"],
+html[data-theme="light"] [class~="text-gray-800"],
+html[data-theme="light"] [class~="text-slate-900"],
+html[data-theme="light"] [class~="text-slate-800"],
+html[data-theme="dark"] [class~="text-gray-900"],
+html[data-theme="dark"] [class~="text-gray-800"],
+html[data-theme="dark"] [class~="text-slate-900"],
+html[data-theme="dark"] [class~="text-slate-800"] {
+  color: #ECEBEC !important;
+}
+html[data-theme="light"] [class~="text-gray-700"],
+html[data-theme="light"] [class~="text-gray-600"],
+html[data-theme="light"] [class~="text-gray-500"],
+html[data-theme="light"] [class~="text-slate-700"],
+html[data-theme="light"] [class~="text-slate-600"],
+html[data-theme="light"] [class~="text-slate-500"],
+html[data-theme="dark"] [class~="text-gray-700"],
+html[data-theme="dark"] [class~="text-gray-600"],
+html[data-theme="dark"] [class~="text-gray-500"],
+html[data-theme="dark"] [class~="text-slate-700"],
+html[data-theme="dark"] [class~="text-slate-600"],
+html[data-theme="dark"] [class~="text-slate-500"] {
+  color: #AFAFAF !important;
+}
+html[data-theme="light"] input:not([type="checkbox"]):not([type="radio"]),
+html[data-theme="light"] textarea,
+html[data-theme="light"] select,
+html[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]),
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] select {
+  color: #ECEBEC !important;
+  background-color: #171616 !important;
+  border-color: #343131 !important;
+}
+html[data-theme="light"] input::placeholder,
+html[data-theme="light"] textarea::placeholder,
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder {
+  color: #777373 !important;
+}
+html[data-theme="light"] .sportiq-card,
+html[data-theme="dark"] .sportiq-card,
+html[data-theme="light"] [role="dialog"],
+html[data-theme="dark"] [role="dialog"] {
+  background-color: #171616;
+  border-color: #343131;
+}

@@ -33,7 +33,7 @@ export const RegisterPage = () => {
         name: formData.name.trim(), email: formData.email.trim().toLowerCase(),
         password: formData.password, role: formData.role,
       });
-      setSuccess(result?.message || 'Account created. Check your inbox and click the verification link before signing in.');
+      setSuccess(result?.message || 'Account created successfully. You can sign in now.');
       setFormData((prev) => ({ ...prev, password: '', confirm_password: '' }));
     } catch (err) {
       setError(err.response?.data?.detail || err.message || 'Registration failed. Please try again.');
@@ -60,8 +60,8 @@ export const RegisterPage = () => {
             <Select label="I am a" options={roleOptions} value={formData.role} onChange={(value) => handleChange('role', value)} />
             <Input label="Password" type="password" placeholder="At least 8 characters" required icon={Lock} showPasswordToggle value={formData.password} onChange={(e) => handleChange('password', e.target.value)} />
             <Input label="Confirm password" type="password" placeholder="Re-enter your password" required icon={Lock} showPasswordToggle value={formData.confirm_password} onChange={(e) => handleChange('confirm_password', e.target.value)} />
-            <p className="text-xs text-[var(--text-secondary)]">We will email you a verification link. No OTP is required. You can sign in after verifying your email.</p>
-            <Button type="submit" className="w-full" disabled={loading}>{loading ? 'Creating account…' : 'Create account & send verification link'}</Button>
+            <p className="text-xs text-[var(--text-secondary)]">Email verification is temporarily disabled while we test the platform. You can sign in immediately after creating your account.</p>
+            <Button type="submit" className="w-full" disabled={loading}>{loading ? 'Creating account…' : 'Create account'}</Button>
           </form>
           <p className="text-center text-sm mt-5 text-[var(--text-secondary)]">Already registered? <Link to="/login" className="font-semibold text-[#ff251f]">Sign in</Link></p>
         </Card>

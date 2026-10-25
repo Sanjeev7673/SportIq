@@ -35,7 +35,7 @@ if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {})
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 JWT_SECRET = os.getenv("JWT_SECRET_KEY", "")
 if not JWT_SECRET:
     # Suitable only for local development; configure a stable secret in production.
@@ -169,10 +169,6 @@ def get_db():
 def create_token(user: User) -> str:
     now = datetime.now(timezone.utc)
     return jwt.encode({"sub": str(user.id), "role": user.role, "iat": now, "exp": now + timedelta(minutes=TOKEN_MINUTES)}, JWT_SECRET, algorithm=JWT_ALGORITHM)
-
-def current_user(db: Session = Depends(get_db), authorization: str | None = None):
-    # Dependency is overridden below with Header so FastAPI extracts the bearer token.
-    raise NotImplementedError
 
 from fastapi import Header
 def get_current_user(authorization: str | None = Header(default=None), db: Session = Depends(get_db)) -> User:

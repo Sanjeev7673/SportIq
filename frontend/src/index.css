@@ -116,3 +116,111 @@
 ::-webkit-scrollbar-thumb:hover {
   background: var(--scrollbar-thumb-hover);
 }
+
+
+/* SportIQ motion system — subtle, performance-friendly UI animation */
+@keyframes sportiq-fade-up {
+  from { opacity: 0; transform: translate3d(0, 18px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@keyframes sportiq-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes sportiq-pop-in {
+  0% { opacity: 0; transform: scale(.96) translateY(8px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes sportiq-glow-pulse {
+  0%, 100% { box-shadow: 0 0 0 rgba(37, 99, 235, 0); }
+  50% { box-shadow: 0 0 28px rgba(37, 99, 235, .16); }
+}
+@keyframes sportiq-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+@keyframes sportiq-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes sportiq-ring {
+  0% { transform: scale(.92); opacity: .65; }
+  100% { transform: scale(1.18); opacity: 0; }
+}
+
+.motion-ready {
+  animation: sportiq-fade-up .55s cubic-bezier(.2,.7,.2,1) both;
+}
+.motion-fade-in { animation: sportiq-fade-in .45s ease-out both; }
+.motion-pop-in { animation: sportiq-pop-in .4s cubic-bezier(.2,.8,.2,1) both; }
+.motion-float { animation: sportiq-float 4s ease-in-out infinite; }
+.motion-glow { animation: sportiq-glow-pulse 3.2s ease-in-out infinite; }
+
+/* Existing cards, panels and interactive controls gain motion without JSX changes. */
+.sportiq-card,
+[class*="rounded-"][class*="border"][class*="bg-"],
+[class*="card"] {
+  transition:
+    transform .24s cubic-bezier(.2,.7,.2,1),
+    box-shadow .24s ease,
+    border-color .24s ease,
+    background-color .24s ease;
+}
+.sportiq-card-hover:hover,
+.sportiq-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 34px rgba(2, 8, 23, .18);
+}
+button,
+[role="button"],
+a {
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .18s ease, box-shadow .2s ease, color .2s ease, background-color .2s ease, border-color .2s ease;
+}
+button:active,
+[role="button"]:active {
+  transform: scale(.98);
+}
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--sportiq-ai);
+  outline-offset: 3px;
+}
+input,
+textarea,
+select {
+  transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
+}
+input:focus,
+textarea:focus,
+select:focus {
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, .12);
+}
+
+/* Landing and dashboard surfaces feel more alive while remaining understated. */
+.radial-bg {
+  background-size: 160% 160%;
+  animation: sportiq-fade-in .8s ease-out both;
+}
+main {
+  animation: sportiq-fade-in .35s ease-out both;
+}
+.sportiq-card-hover:hover {
+  border-color: rgba(6, 182, 212, .45);
+}
+::selection {
+  background: rgba(37, 99, 235, .32);
+}
+
+/* Honor accessibility preferences and avoid motion for users who request it. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}

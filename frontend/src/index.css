@@ -34,3 +34,25 @@
 .sq-hero-video{pointer-events:none}
 @media(max-width:600px){.sq-hero-video{object-position:center center}}
 @media(prefers-reduced-motion:reduce){.sq-hero-video{display:none}}
+
+
+/* SportIQ unified platform design system: cinematic charcoal, warm white, and sport red.
+   Scoped away from the public landing page so its editorial layout remains intact. */
+:root{
+  --sportiq-bg:#090b0b;--sportiq-card:#141716;--sportiq-card-hover:#1b1f1d;
+  --sportiq-surface:#101311;--sportiq-border:#303632;--sportiq-primary:#ff251f;
+  --sportiq-ai:#ff6a4d;--sportiq-success:#32a875;--sportiq-warning:#e9a23b;
+  --sportiq-error:#ef4444;--sportiq-text:#f8f6f2;--sportiq-muted:#b7b7b2;
+  --bg-main:#090b0b;--bg-card:#141716;--bg-card-hover:#1b1f1d;--bg-surface:#101311;
+  --text-primary:#f8f6f2;--text-secondary:#b7b7b2;--text-muted:#8b908a;
+  --border-color:#303632;--border-subtle:rgba(248,246,242,.1);
+  --input-bg:#101311;--input-border:#303632;--scrollbar-track:#090b0b;
+  --scrollbar-thumb:#303632;--scrollbar-thumb-hover:#505750;
+}
+.dark{--bg-main:#090b0b;--bg-card:#141716;--bg-card-hover:#1b1f1d;--bg-surface:#101311;--text-primary:#f8f6f2;--text-secondary:#b7b7b2;--text-muted:#8b908a;--border-color:#303632;--border-subtle:rgba(248,246,242,.1);--input-bg:#101311;--input-border:#303632;--scrollbar-track:#090b0b;--scrollbar-thumb:#303632;--scrollbar-thumb-hover:#505750}
+.light{--bg-main:#f4f2ec;--bg-card:#fffefa;--bg-card-hover:#f0eee7;--bg-surface:#fffefa;--text-primary:#171a18;--text-secondary:#555b55;--text-muted:#747a73;--border-color:#d9d9d0;--border-subtle:#e8e7df;--input-bg:#fffefa;--input-border:#d9d9d0;--scrollbar-track:#f4f2ec;--scrollbar-thumb:#c8c9c0;--scrollbar-thumb-hover:#9a9e95}
+body{font-family:Inter,Arial,sans-serif}
+.sportiq-card{background-color:var(--bg-card);border-color:var(--border-color);border-radius:1rem}
+.radial-bg{background:radial-gradient(circle at 50% 0%,rgba(255,37,31,.11),transparent 65%)}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid #ff514b;outline-offset:2px}
+input,select,textarea{accent-color:#ff251f}

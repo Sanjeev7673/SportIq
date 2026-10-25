@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Activity, Lock, User, AlertCircle, CheckCircle2 } from 'lucide-react';
@@ -7,9 +7,13 @@ import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 import ThemeToggle from '../../components/common/ThemeToggle';
 import ForgotPasswordModal from '../../components/auth/ForgotPasswordModal';
+import api from '../../services/api';
 
 export const LoginPage = () => {
   const { login } = useAuth();
+
+  // Wake a sleeping free-tier API while the user enters credentials.
+  useEffect(() => { api.get('/health').catch(() => {}); }, []);
   const navigate = useNavigate();
 
   const [identifier, setIdentifier] = useState('');

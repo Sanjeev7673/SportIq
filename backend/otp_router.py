@@ -7,6 +7,9 @@ from __future__ import annotations
 
 import os
 import re
+import hashlib
+import secrets
+from datetime import datetime, timedelta, timezone
 from typing import Literal
 
 from fastapi import APIRouter, HTTPException, status
@@ -119,10 +122,44 @@ def verify_otp(payload: VerifyOTPRequest):
             detail="The verification provider could not validate the code. Please try again.",
         ) from exc
     approved = check.status == "approved"
-    return {
+    response = {
         "success": approved,
         "verified": approved,
         "purpose": payload.purpose,
         "channel": payload.channel,
         "message": "Code verified." if approved else "The code is invalid or expired. Request a new code.",
     }
+    if not approved:
+        return response
+
+    # Resolve account state only after the provider confirms the code. Imports are local
+    # to avoid a module-import cycle with the FastAPI application.
+    from app.main import SessionLocal, User, PasswordResetGrant
+    db = SessionLocal()
+    try:
+        if payload.purpose == "registration" and payload.channel == "email":
+            user = db.query(User).filter(User.email == destination.lower()).first()
+            if user:
+                user.email_verified = True
+                db.commit()
+                response["message"] = "Email verified. You can now log in."
+        elif payload.purpose == "forgot_password" and payload.channel == "email":
+            user = db.query(User).filter(User.email == destination.lower()).first()
+            if user:
+                raw_token = secrets.token_urlsafe(32)
+                token_hash = hashlib.sha256(raw_token.encode("utf-8")).hexdigest()
+                now = datetime.now(timezone.utc)
+                grant = PasswordResetGrant(
+                    user_id=user.id,
+                    token_hash=token_hash,
+                    expires_at=now + timedelta(minutes=10),
+                )
+                db.add(grant)
+                db.commit()
+                response["reset_token"] = raw_token
+                response["message"] = "Code verified. Use the reset token to set a new password within 10 minutes."
+        else:
+            response["message"] = "Code verified. This channel is not yet connected to an account recovery action."
+        return response
+    finally:
+        db.close()

@@ -16,7 +16,7 @@ export const ProtectedRoute = ({ allowedRoles = [] }) => {
 
   if (loading) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-[#0a0f1d]">
+      <div className="flex h-screen w-full items-center justify-center bg-[var(--bg-main)]">
         <Loader message="Verifying authentication session..." size="lg" />
       </div>
     );

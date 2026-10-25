@@ -308,22 +308,17 @@ def send_verification_email(email: str, token: str) -> None:
 
 @app.post("/api/v1/auth/register", status_code=201)
 def register(payload: RegisterIn, db: Session = Depends(get_db)):
+    """Create an account without email verification during the initial platform test phase."""
     email = str(payload.email).lower().strip()
     if db.query(User).filter(User.email == email).first():
         raise HTTPException(status_code=409, detail="An account with this email already exists")
     normalized_roles = {"PLAYER": "athlete", "ATHLETE": "athlete", "COACH": "coach", "SCOUT": "scout", "ORGANIZER": "organizer", "ADMIN": "admin", "SPONSOR": "sponsor"}
     role = normalized_roles.get(payload.role.upper(), "athlete")
     user = User(name=payload.name.strip(), email=email, phone=payload.phone, password_hash=pwd_context.hash(payload.password), role=role, email_verified=False)
-    db.add(user); db.commit(); db.refresh(user)
-    raw_token = secrets.token_urlsafe(32)
-    grant = EmailVerificationGrant(user_id=user.id, token_hash=hashlib.sha256(raw_token.encode()).hexdigest(), expires_at=datetime.now(timezone.utc) + timedelta(minutes=30))
-    db.add(grant); db.commit()
-    try:
-        send_verification_email(email, raw_token)
-    except Exception:
-        db.delete(grant); db.delete(user); db.commit()
-        raise
-    return {"success": True, "verification_required": True, "message": "Account created. Check your email and click the verification link before signing in."}
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return {"success": True, "verification_required": False, "message": "Account created successfully. You can sign in now."}
 
 @app.get("/api/v1/auth/verify-email", response_class=HTMLResponse)
 def verify_email(token: str, db: Session = Depends(get_db)):
@@ -346,8 +341,7 @@ def login(payload: LoginIn, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == identifier).first()
     if not user or not pwd_context.verify(payload.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Incorrect email or password")
-    if not user.email_verified:
-        raise HTTPException(status_code=403, detail="Please verify your email using the link we sent before signing in.")
+    # Email verification will be enabled after the initial end-to-end platform test.
     return {"success": True, "user": user_json(user), "access_token": create_token(user), "token_type": "bearer"}
 
 @app.post("/api/v1/auth/reset-password")

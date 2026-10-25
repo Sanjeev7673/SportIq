@@ -5,7 +5,6 @@ import { Activity, Lock, User, AlertCircle, CheckCircle2 } from 'lucide-react';
 import Card from '../../components/common/Card';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
-import ThemeToggle from '../../components/common/ThemeToggle';
 import ForgotPasswordModal from '../../components/auth/ForgotPasswordModal';
 
 export const LoginPage = () => {
@@ -44,28 +43,23 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B1220] text-[#F8FAFC] flex flex-col items-center justify-center p-4 radial-bg relative transition-colors duration-200">
-      {/* Top Bar Theme Toggle */}
-      <div className="absolute top-4 right-4">
-        <ThemeToggle size="sm" />
-      </div>
-
+    <div className="min-h-screen bg-[#090808] text-[#ECEBEC] flex flex-col items-center justify-center p-4 radial-bg relative transition-colors duration-200">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-2.5 mb-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#2563EB] shadow-sm">
-              <Activity className="h-6 w-6 text-[#F8FAFC]" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#F71601] shadow-sm">
+              <Activity className="h-6 w-6 text-[#ECEBEC]" />
             </div>
-            <span className="font-display text-2xl font-bold tracking-tight text-[#F8FAFC]">
-              Sport<span className="text-[#06B6D4]">IQ</span>
+            <span className="font-display text-2xl font-bold tracking-tight text-[#ECEBEC]">
+              Sport<span className="text-[#F71601]">IQ</span>
             </span>
           </Link>
-          <p className="text-xs text-[#94A3B8]">Sign in to your sports analytics workspace</p>
+          <p className="text-xs text-[#AFAFAF]">Sign in to your sports analytics workspace</p>
         </div>
 
         {/* Card */}
-        <Card className="border-[#1E293B] bg-[#111C2E]">
+        <Card className="border-[#343131] bg-[#171616]">
           {successMsg && (
             <div className="flex items-center gap-2 p-3 mb-5 rounded-xl bg-[#22C55E]/10 border border-[#22C55E]/30 text-[#22C55E] text-xs font-medium">
               <CheckCircle2 className="w-4 h-4 shrink-0" />
@@ -93,7 +87,7 @@ export const LoginPage = () => {
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#94A3B8]">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#AFAFAF]">
                   Password
                 </label>
                 <button
@@ -103,7 +97,7 @@ export const LoginPage = () => {
                     setSuccessMsg('');
                     setIsForgotModalOpen(true);
                   }}
-                  className="text-xs text-[#2563EB] hover:text-[#3B82F6] font-semibold transition-colors cursor-pointer"
+                  className="text-xs text-[#F71601] hover:text-[#FF4938] font-semibold transition-colors cursor-pointer"
                 >
                   Forgot Password?
                 </button>
@@ -131,9 +125,9 @@ export const LoginPage = () => {
             </Button>
           </form>
 
-          <div className="mt-6 pt-5 border-t border-[#1E293B] text-center text-xs text-[#94A3B8]">
+          <div className="mt-6 pt-5 border-t border-[#343131] text-center text-xs text-[#AFAFAF]">
             Don't have an account?{' '}
-            <Link to="/register" className="text-[#2563EB] hover:text-[#3B82F6] font-semibold">
+            <Link to="/register" className="text-[#F71601] hover:text-[#FF4938] font-semibold">
               Create an account
             </Link>
           </div>

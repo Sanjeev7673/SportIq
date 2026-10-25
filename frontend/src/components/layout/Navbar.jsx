@@ -66,17 +66,17 @@ export const Navbar = ({ onToggleSidebar }) => {
         <button
           onClick={onToggleSidebar}
           aria-label="Toggle navigation menu"
-          className="p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded-lg hover:bg-[#16243B] lg:hidden transition-colors"
+          className="p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded-lg hover:bg-[var(--bg-card-hover)] lg:hidden transition-colors"
         >
           <Menu className="w-5 h-5" />
         </button>
 
         <Link to="/" className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#2563EB] shadow-sm">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#ff251f] shadow-sm">
             <Activity className="h-5 w-5 text-[var(--text-primary)]" />
           </div>
-          <span className="font-display text-xl font-bold tracking-tight text-[#F8FAFC]">
-            Sport<span className="text-[#06B6D4]">IQ</span>
+          <span className="font-display text-xl font-bold tracking-tight text-[var(--text-primary)]">
+            Sport<span className="text-[#ff6a4d]">IQ</span>
           </span>
           {user?.role === 'ADMIN' && (
             <span className="hidden sm:inline-block px-2 py-0.5 rounded-full bg-[#F59E0B]/10 text-[#F59E0B] border border-[#F59E0B]/20 text-[10px] font-extrabold uppercase tracking-wider ml-1">
@@ -93,7 +93,7 @@ export const Navbar = ({ onToggleSidebar }) => {
             <button
               type="button"
               onClick={() => setShowNotifs(!showNotifs)}
-              className="relative p-2 rounded-xl text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#16243B] transition-all cursor-pointer"
+              className="relative p-2 rounded-xl text-[var(--text-secondary)] hover:text-[#F8FAFC] hover:bg-[var(--bg-card-hover)] transition-all cursor-pointer"
               title="Admin Alerts & Notifications"
             >
               <Bell className="w-5 h-5 text-[#2563EB]" />
@@ -106,7 +106,7 @@ export const Navbar = ({ onToggleSidebar }) => {
 
             {/* Notifications Dropdown */}
             {showNotifs && (
-              <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-[#111C2E] border border-[#1E293B] shadow-2xl py-3 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-2xl py-3 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
                 <div className="px-4 pb-2 border-b border-[#1E293B] flex items-center justify-between">
                   <span className="text-xs font-bold text-[#F8FAFC] uppercase tracking-wider">
                     Admin Notifications

@@ -57,19 +57,20 @@ export const RegisterPage = () => {
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#ff251f]"><Activity className="h-6 w-6 text-white" /></div>
             <span className="font-display text-2xl font-bold tracking-tight">Sport<span className="text-[#ff6a4d]">IQ</span></span>
           </Link>
-          <p className="text-xs text-[var(--text-secondary)]">Create your sports intelligence account</p>
+          <p className="text-xs text-[var(--text-secondary)]">{import.meta.env.VITE_DEMO_MODE === 'true' ? 'Explore the SportIQ player preview' : 'Create your sports intelligence account'}</p>
+          {import.meta.env.VITE_DEMO_MODE === 'true' && <div role="status" className="mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-left text-xs leading-5 text-amber-700">Preview mode only: no real account is created. Continue to the player demo using any email and password. Your demo data stays in this browser.</div>}
         </div>
         <Card className="border-[var(--border-color)] bg-[var(--bg-card)]">
           {success && <div role="status" className="flex items-start gap-2 p-3 mb-5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 text-sm"><CheckCircle2 className="w-5 h-5 shrink-0" /><span>{success} <Link className="underline font-semibold" to="/login">Go to sign in</Link></span></div>}
           {error && <div role="alert" className="flex items-center gap-2 p-3 mb-5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 text-sm"><AlertCircle className="w-4 h-4 shrink-0" /><span>{error}</span></div>}
           <form onSubmit={handleSubmit} className="space-y-4">
-            <Input label="Full name" type="text" placeholder="Your full name" required icon={User} value={formData.name} onChange={(e) => handleChange('name', e.target.value)} />
+            {import.meta.env.VITE_DEMO_MODE !== 'true' && <Input label="Full name" type="text" placeholder="Your full name" required icon={User} value={formData.name} onChange={(e) => handleChange('name', e.target.value)} />}
             <Input label="Email address" type="email" placeholder="you@example.com" required icon={Mail} value={formData.email} onChange={(e) => handleChange('email', e.target.value)} />
-            <Select label="I am a" options={roleOptions} value={formData.role} onChange={(event) => handleChange('role', event.target.value)} />
+            {import.meta.env.VITE_DEMO_MODE !== 'true' && <Select label="I am a" options={roleOptions} value={formData.role} onChange={(event) => handleChange('role', event.target.value)} />}
             <Input label="Password" type="password" placeholder="At least 8 characters" required icon={Lock} showPasswordToggle value={formData.password} onChange={(e) => handleChange('password', e.target.value)} />
             <Input label="Confirm password" type="password" placeholder="Re-enter your password" required icon={Lock} showPasswordToggle value={formData.confirm_password} onChange={(e) => handleChange('confirm_password', e.target.value)} />
-            <p className="text-xs text-[var(--text-secondary)]">Email verification is temporarily disabled while we test the platform. You can sign in immediately after creating your account.</p>
-            <Button type="submit" className="w-full" disabled={loading}>{loading ? 'Creating account…' : 'Create account'}</Button>
+            {import.meta.env.VITE_DEMO_MODE !== 'true' && <p className="text-xs text-[var(--text-secondary)]">You may need to verify your email before using all account features.</p>}
+            <Button type="submit" className="w-full" disabled={loading}>{loading ? (import.meta.env.VITE_DEMO_MODE === 'true' ? 'Opening preview…' : 'Creating account…') : (import.meta.env.VITE_DEMO_MODE === 'true' ? 'Explore player preview' : 'Create account')}</Button>
           </form>
           <p className="text-center text-sm mt-5 text-[var(--text-secondary)]">Already registered? <Link to="/login" className="font-semibold text-[#ff251f]">Sign in</Link></p>
         </Card>

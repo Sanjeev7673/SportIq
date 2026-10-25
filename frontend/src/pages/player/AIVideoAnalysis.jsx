@@ -65,6 +65,13 @@ export const AIVideoAnalysis = () => {
   const [deleteError, setDeleteError] = useState('');
 
   const loadData = async () => {
+    if (import.meta.env.VITE_DEMO_MODE === 'true') {
+      setProfile(JSON.parse(localStorage.getItem('sportiq_demo_profile') || 'null'));
+      setCatalog([]);
+      setAssessments([]);
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
       const [profRes, catalogRes, myAssessmentsRes] = await Promise.all([

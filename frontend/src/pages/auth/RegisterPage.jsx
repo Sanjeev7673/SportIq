@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { Activity, Lock, Mail, User, Smartphone, AlertCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Activity, Lock, Mail, User, AlertCircle, CheckCircle2 } from 'lucide-react';
 import Card from '../../components/common/Card';
 import Input from '../../components/common/Input';
 import Select from '../../components/common/Select';
@@ -11,24 +10,11 @@ import { USER_ROLES } from '../../utils/constants';
 import api from '../../services/api';
 
 export const RegisterPage = () => {
-  const { register } = useAuth();
-
-  // Wake a sleeping free-tier API while the user fills in the form.
-  useEffect(() => { api.get('/health').catch(() => {}); }, []);
-  const navigate = useNavigate();
-
-  const [regMethod, setRegMethod] = useState('email'); // 'email' or 'phone'
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone_number: '',
-    password: '',
-    confirm_password: '',
-    role: USER_ROLES.PLAYER,
-  });
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', confirm_password: '', role: USER_ROLES.PLAYER });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  useEffect(() => { api.get('/health').catch(() => {}); }, []);
 
   const roleOptions = [
     { value: USER_ROLES.PLAYER, label: 'Athlete / Player' },
@@ -36,230 +22,51 @@ export const RegisterPage = () => {
     { value: USER_ROLES.SCOUT, label: 'Scout / Recruiter' },
     { value: USER_ROLES.ORGANIZER, label: 'Tournament Organizer / Academy' },
   ];
-
+  const handleChange = (field, value) => setFormData((prev) => ({ ...prev, [field]: value }));
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
-
-    // Password confirmation check
-    if (formData.password !== formData.confirm_password) {
-      setError('Password and Confirm Password do not match.');
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters in length.');
-      return;
-    }
-
+    e.preventDefault(); setError(''); setSuccess('');
+    if (formData.password !== formData.confirm_password) return setError('Passwords do not match.');
+    if (formData.password.length < 8) return setError('Use a password with at least 8 characters.');
     setLoading(true);
-
     try {
-      const payload = {
-        name: formData.name.trim(),
-        password: formData.password,
-        role: formData.role,
-      };
-
-      if (regMethod === 'email') {
-        if (!formData.email) {
-          setError('Please enter your email address.');
-          setLoading(false);
-          return;
-        }
-        payload.email = formData.email.trim();
-      } else {
-        if (!formData.phone_number) {
-          setError('Please enter your 10-digit mobile number.');
-          setLoading(false);
-          return;
-        }
-        payload.phone_number = formData.phone_number.trim();
-      }
-
-      const res = await register(payload);
-      setSuccess('Account created successfully. Opening your SportIQ workspace…');
-      const role = res.user?.role;
-      if (role === 'PLAYER') navigate('/player/profile');
-      else if (role === 'COACH') navigate('/coach/dashboard');
-      else if (role === 'SCOUT') navigate('/scout/dashboard');
-      else if (role === 'ORGANIZER') navigate('/organizer/dashboard');
-      else if (role === 'ADMIN') navigate('/admin/dashboard');
-      else navigate('/');
+      const result = await api.post('/auth/register', {
+        name: formData.name.trim(), email: formData.email.trim().toLowerCase(),
+        password: formData.password, role: formData.role,
+      });
+      setSuccess(result?.message || 'Account created. Check your inbox and click the verification link before signing in.');
+      setFormData((prev) => ({ ...prev, password: '', confirm_password: '' }));
     } catch (err) {
-      setError(err.message || 'Registration failed. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+      setError(err.response?.data?.detail || err.message || 'Registration failed. Please try again.');
+    } finally { setLoading(false); }
   };
 
   return (
     <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] flex flex-col items-center justify-center p-4 radial-bg relative transition-colors duration-200">
-      {/* Top Bar Theme Toggle */}
-      <div className="absolute top-4 right-4">
-        <ThemeToggle size="sm" />
-      </div>
-
+      <div className="absolute top-4 right-4"><ThemeToggle size="sm" /></div>
       <div className="w-full max-w-md">
-        {/* Logo */}
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-2.5 mb-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#ff251f] shadow-sm">
-              <Activity className="h-6 w-6 text-[var(--text-primary)]" />
-            </div>
-            <span className="font-display text-2xl font-bold tracking-tight text-[var(--text-primary)]">
-              Sport<span className="text-[#ff6a4d]">IQ</span>
-            </span>
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#ff251f]"><Activity className="h-6 w-6 text-white" /></div>
+            <span className="font-display text-2xl font-bold tracking-tight">Sport<span className="text-[#ff6a4d]">IQ</span></span>
           </Link>
-          <p className="text-xs text-[var(--text-secondary)]">Create your athletic intelligence account</p>
+          <p className="text-xs text-[var(--text-secondary)]">Create your sports intelligence account</p>
         </div>
-
-        {/* Card */}
         <Card className="border-[var(--border-color)] bg-[var(--bg-card)]">
-          {success && (
-            <div role="status" className="flex items-center gap-2 p-3 mb-5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 text-xs font-semibold">{success}</div>
-          )}
-          {error && (
-            <div className="flex items-center gap-2 p-3 mb-5 rounded-xl bg-[#EF4444]/10 border border-[#EF4444]/30 text-[#EF4444] text-xs font-medium">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              <span>{error}</span>
-            </div>
-          )}
-
-          {/* Registration Method Toggle */}
-          <div className="mb-5">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] mb-2">
-              Registration Method
-            </label>
-            <div className="grid grid-cols-2 gap-2 p-1 bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl">
-              <button
-                type="button"
-                onClick={() => {
-                  setRegMethod('email');
-                  setError('');
-                }}
-                className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  regMethod === 'email'
-                    ? 'bg-[var(--bg-card)] text-[#ff251f] border border-[#ff251f]/40 shadow-sm'
-                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                }`}
-              >
-                <Mail className="w-3.5 h-3.5" />
-                <span>Email</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setRegMethod('phone');
-                  setError('');
-                }}
-                className={`flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  regMethod === 'phone'
-                    ? 'bg-[var(--bg-card)] text-[#ff251f] border border-[#ff251f]/40 shadow-sm'
-                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                }`}
-              >
-                <Smartphone className="w-3.5 h-3.5" />
-                <span>Phone Number</span>
-              </button>
-            </div>
-          </div>
-
+          {success && <div role="status" className="flex items-start gap-2 p-3 mb-5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 text-sm"><CheckCircle2 className="w-5 h-5 shrink-0" /><span>{success} <Link className="underline font-semibold" to="/login">Go to sign in</Link></span></div>}
+          {error && <div role="alert" className="flex items-center gap-2 p-3 mb-5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 text-sm"><AlertCircle className="w-4 h-4 shrink-0" /><span>{error}</span></div>}
           <form onSubmit={handleSubmit} className="space-y-4">
-            <Input
-              label="Full Name"
-              type="text"
-              placeholder="e.g. Virat Kohli"
-              required
-              icon={User}
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            />
-
-            {regMethod === 'email' ? (
-              <Input
-                label="Email Address"
-                type="email"
-                placeholder="athlete@sportiq.ai"
-                required
-                icon={Mail}
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              />
-            ) : (
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">
-                  Indian Mobile Number
-                </label>
-                <div className="relative rounded-xl flex items-center">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[var(--text-secondary)] font-semibold text-xs">
-                    <span className="text-[#ff251f] font-bold mr-1">🇮🇳 +91</span>
-                  </div>
-                  <input
-                    type="tel"
-                    placeholder="98765 43210"
-                    required
-                    className="block w-full rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)] placeholder-[#b7b7b2]/60 focus:outline-none focus:ring-2 focus:ring-[#ff251f] focus:border-[#ff251f] text-sm pl-20 pr-3.5 py-2.5 transition-all duration-200"
-                    value={formData.phone_number}
-                    onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
-                  />
-                </div>
-                <p className="text-[11px] text-[var(--text-secondary)]/80 mt-1">Accepts standard 10-digit mobile numbers.</p>
-              </div>
-            )}
-
-            <Input
-              label="Password"
-              type="password"
-              placeholder="••••••••"
-              required
-              icon={Lock}
-              showPasswordToggle={true}
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-            />
-
-            <Input
-              label="Confirm Password"
-              type="password"
-              placeholder="••••••••"
-              required
-              icon={Lock}
-              showPasswordToggle={true}
-              value={formData.confirm_password}
-              onChange={(e) => setFormData({ ...formData, confirm_password: e.target.value })}
-            />
-
-            <Select
-              label="Account Role"
-              options={roleOptions}
-              value={formData.role}
-              onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-            />
-
-            <Button
-              type="submit"
-              variant="primary"
-              className="w-full mt-2"
-              size="md"
-              loading={loading}
-            >
-              Create Account
-            </Button>
+            <Input label="Full name" type="text" placeholder="Your full name" required icon={User} value={formData.name} onChange={(e) => handleChange('name', e.target.value)} />
+            <Input label="Email address" type="email" placeholder="you@example.com" required icon={Mail} value={formData.email} onChange={(e) => handleChange('email', e.target.value)} />
+            <Select label="I am a" options={roleOptions} value={formData.role} onChange={(value) => handleChange('role', value)} />
+            <Input label="Password" type="password" placeholder="At least 8 characters" required icon={Lock} showPasswordToggle value={formData.password} onChange={(e) => handleChange('password', e.target.value)} />
+            <Input label="Confirm password" type="password" placeholder="Re-enter your password" required icon={Lock} showPasswordToggle value={formData.confirm_password} onChange={(e) => handleChange('confirm_password', e.target.value)} />
+            <p className="text-xs text-[var(--text-secondary)]">We will email you a verification link. No OTP is required. You can sign in after verifying your email.</p>
+            <Button type="submit" className="w-full" disabled={loading}>{loading ? 'Creating account…' : 'Create account & send verification link'}</Button>
           </form>
-
-          <div className="mt-6 pt-5 border-t border-[var(--border-color)] text-center text-xs text-[var(--text-secondary)]">
-            Already have an account?{' '}
-            <Link to="/login" className="text-[#ff251f] hover:text-[#ff6a4d] font-semibold">
-              Sign in
-            </Link>
-          </div>
+          <p className="text-center text-sm mt-5 text-[var(--text-secondary)]">Already registered? <Link to="/login" className="font-semibold text-[#ff251f]">Sign in</Link></p>
         </Card>
       </div>
     </div>
   );
 };
-
 export default RegisterPage;

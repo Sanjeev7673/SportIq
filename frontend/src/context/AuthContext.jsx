@@ -72,13 +72,7 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
-  const register = async (registerData) => {
-    const data = await authService.register(registerData);
-    setUser(data.user);
-    setToken(data.access_token);
-    setLoading(false);
-    return data;
-  };
+  const register = async (registerData) => authService.register(registerData);
 
   const logout = () => {
     clearSession();

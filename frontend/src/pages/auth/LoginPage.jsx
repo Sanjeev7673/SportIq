@@ -7,13 +7,13 @@ import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 import ThemeToggle from '../../components/common/ThemeToggle';
 import ForgotPasswordModal from '../../components/auth/ForgotPasswordModal';
-import api from '../../services/api';
+import { wakeBackend } from '../../services/api';
 
 export const LoginPage = () => {
   const { login } = useAuth();
 
   // Wake a sleeping free-tier API while the user enters credentials.
-  useEffect(() => { api.get('/health').catch(() => {}); }, []);
+  useEffect(() => { wakeBackend(); }, []);
   const navigate = useNavigate();
 
   const [identifier, setIdentifier] = useState('');

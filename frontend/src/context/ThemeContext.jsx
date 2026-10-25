@@ -17,13 +17,13 @@ const ThemeContext = createContext({
 });
 
 export const ThemeProvider = ({ children }) => {
-  // 1. Initialize theme preference from localStorage or default to SYSTEM
+  // 1. Initialize theme preference from localStorage or default to DARK
   const [theme, setThemeState] = useState(() => {
     const saved = localStorage.getItem(THEME_STORAGE_KEY);
     if (saved && Object.values(THEME_MODES).includes(saved)) {
       return saved;
     }
-    return THEME_MODES.SYSTEM;
+    return THEME_MODES.DARK;
   });
 
   // 2. Track System Color Scheme Preference

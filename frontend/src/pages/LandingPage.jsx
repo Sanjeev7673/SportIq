@@ -9,7 +9,7 @@ const slides = [
 ];
 const features = [
  {n:'01',Icon:ScanLine,title:'AI MOVEMENT ANALYSIS',text:'Explore movement patterns and technique with computer vision and pose estimation from video.'},
- {n:'02',Icon:ChartNoAxesCombined,title:'PERFORMANCE INSIGHTS',text:'Bring key performance indicators into focus and understand progress over time.'},
+ {n:'02',Icon:BarChart3,title:'PERFORMANCE INSIGHTS',text:'Bring key performance indicators into focus and understand progress over time.'},
  {n:'03',Icon:BrainCircuit,title:'TALENT DISCOVERY',text:'Help coaches and scouts discover emerging potential with structured athlete profiles.'},
  {n:'04',Icon:ShieldCheck,title:'ATHLETE FIRST',text:'Keep athletes at the centre with clear feedback, responsible AI and continuous improvement.'}
 ];

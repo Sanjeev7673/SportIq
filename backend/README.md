@@ -10,7 +10,7 @@ pip install -r requirements.txt
 set JWT_SECRET_KEY=replace-with-a-long-random-secret
 uvicorn app.main:app --reload
 ```
-Open `/docs` for interactive API docs and `/health` for health checks.
+Open `/docs` for interactive API docs and `/health` for health checks. Run the unit checks with `python -m unittest discover -s tests -v`.
 
 ## Render
 Set **Root Directory** to `backend`, **Build Command** to `pip install -r requirements.txt`, and **Start Command** to `uvicorn app.main:app --host 0.0.0.0 --port $PORT`.
@@ -31,7 +31,7 @@ Registration flow: create the account, request an email OTP with purpose `regist
 
 ## Important limitations
 - Video upload is capped at 250 MB and currently writes to local disk. Render local filesystems are ephemeral; use object storage (e.g. S3 or Cloudinary) before production.
-- The report is a placeholder and does **not** perform computer vision or biomechanical analysis yet. Integrate and validate a pose-estimation pipeline before reporting timing, form scores, strengths or weaknesses as measured facts.
+- Video uploads now invoke an experimental pose-analysis module. Install `opencv-python-headless` and `mediapipe` in the backend environment to enable landmark sampling; if those packages are unavailable, analysis reports that clearly. The module reports sampled-frame pose detection and approximate 2D knee-angle ranges only. It does **not** provide validated sprint timing, jump distance/height, hurdle scores, injury risk, or competition-grade rankings. Camera angle, occlusion, lighting, and motion blur can affect results; qualified coach review is required.
 - QR generation requires `PUBLIC_API_URL`. The current report endpoint is authenticated, so do not treat its QR as a public share link. A consent-based expiring share token is needed for sponsor/coach sharing.
 - OTP routes are mounted and the email/SMS verification flow is wired to account verification/reset grants, but live delivery is untested until valid Twilio credentials and channel setup are configured. The reset token is returned to the client after successful OTP verification; production should deliver the reset grant through a hardened flow and add rate limits, resend cooldowns, and abuse monitoring.
 - Add automated tests, rate limiting, audit logging, role-based sponsor/coach permissions, secure object storage, database migrations and consent controls before production.

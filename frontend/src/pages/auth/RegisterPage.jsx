@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Activity, Lock, Mail, User, AlertCircle, CheckCircle2 } from 'lucide-react';
 import Card from '../../components/common/Card';
 import Input from '../../components/common/Input';
@@ -7,14 +7,17 @@ import Select from '../../components/common/Select';
 import Button from '../../components/common/Button';
 import ThemeToggle from '../../components/common/ThemeToggle';
 import { USER_ROLES } from '../../utils/constants';
-import api from '../../services/api';
+import api, { wakeBackend } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
 export const RegisterPage = () => {
+  const navigate = useNavigate();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({ name: '', email: '', password: '', confirm_password: '', role: USER_ROLES.PLAYER });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  useEffect(() => { api.get('/health').catch(() => {}); }, []);
+  useEffect(() => { wakeBackend(); }, []);
 
   const roleOptions = [
     { value: USER_ROLES.PLAYER, label: 'Athlete / Player' },
@@ -29,6 +32,11 @@ export const RegisterPage = () => {
     if (formData.password.length < 8) return setError('Use a password with at least 8 characters.');
     setLoading(true);
     try {
+      if (import.meta.env.VITE_DEMO_MODE === 'true') {
+        await login(formData.email.trim().toLowerCase(), formData.password);
+        navigate('/player/dashboard', { replace: true });
+        return;
+      }
       const result = await api.post('/auth/register', {
         name: formData.name.trim(), email: formData.email.trim().toLowerCase(),
         password: formData.password, role: formData.role,

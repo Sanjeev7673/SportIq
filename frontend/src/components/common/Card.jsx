@@ -12,22 +12,22 @@ export const Card = ({
 }) => {
   return (
     <div
-      className={`bg-[#111C2E] border border-[#1E293B] rounded-2xl p-6 transition-all duration-200 ${
-        hover ? 'hover:border-[#334155] hover:bg-[#16243B]/60 shadow-sm' : ''
+      className={`bg-[#141716] border border-[#303632] rounded-2xl p-6 transition-all duration-200 ${
+        hover ? 'hover:border-[#505750] hover:bg-[#1b1f1d]/60 shadow-sm' : ''
       } ${className}`}
       {...props}
     >
       {(title || action || Icon) && (
-        <div className="flex items-center justify-between mb-5 pb-4 border-b border-[#1E293B]">
+        <div className="flex items-center justify-between mb-5 pb-4 border-b border-[#303632]">
           <div className="flex items-center gap-3">
             {Icon && (
-              <div className="p-2.5 rounded-xl bg-[#2563EB]/10 text-[#2563EB] border border-[#2563EB]/20">
+              <div className="p-2.5 rounded-xl bg-[#ff251f]/10 text-[#ff251f] border border-[#ff251f]/20">
                 <Icon className="w-5 h-5" />
               </div>
             )}
             <div>
-              {title && <h3 className="text-base sm:text-lg font-bold text-[#F8FAFC] font-display tracking-tight">{title}</h3>}
-              {subtitle && <p className="text-xs text-[#94A3B8] mt-0.5">{subtitle}</p>}
+              {title && <h3 className="text-base sm:text-lg font-bold text-[#f8f6f2] font-display tracking-tight">{title}</h3>}
+              {subtitle && <p className="text-xs text-[#b7b7b2] mt-0.5">{subtitle}</p>}
             </div>
           </div>
           {action && <div>{action}</div>}

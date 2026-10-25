@@ -66,6 +66,16 @@ export const PlayerDashboard = () => {
   };
 
   useEffect(() => {
+    if (import.meta.env.VITE_DEMO_MODE === 'true') {
+      // Keep demo preview independent of the unavailable backend.
+      setProfile({ id: 'demo-player', sport: 'Football', position: 'Forward', experience: 2, age: 20, profile_image: null });
+      setStats({ avg_speed: 28, max_speed: 32, total_matches_played: 12 });
+      setHistory([]);
+      setLatestAI({ talent_score: 82, potential_level: 'High' });
+      setRecommendations([]);
+      setLoading(false);
+      return;
+    }
     fetchDashboardData();
   }, []);
 

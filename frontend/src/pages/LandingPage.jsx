@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Activity, ArrowDown, ArrowRight, ArrowUpRight, BrainCircuit, ChartNoAxesCombined, Menu, Play, ScanLine, ShieldCheck, X } from 'lucide-react';
+import { Activity, ArrowDown, ArrowRight, ArrowUpRight, BrainCircuit, BarChart3, Menu, Play, ScanLine, ShieldCheck, X } from 'lucide-react';
 
 const slides = [
  { kicker:'AI-POWERED SPORTS INTELLIGENCE', title:<>EVERY TALENT<br/><em>HAS A MOMENT.</em></>, line:'Every talent has a moment to rise.', image:'https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&w=2400&q=90', n:'01', label:'THE NEXT GENERATION' },

@@ -12,7 +12,7 @@ class PoseAnalysisUnitTests(unittest.TestCase):
         self.assertAlmostEqual(_angle((-1.0, 0.0), (0.0, 0.0), (1.0, 0.0)), 180.0)
 
     def test_degenerate_points_return_nan(self):
-        self.assertTrue(math.isnan(_angle((1.0, 1.0), (1.0, 1.0), (2.0, 2.0)))
+        self.assertTrue(math.isnan(_angle((1.0, 1.0), (1.0, 1.0), (2.0, 2.0))))
 
 
 if __name__ == "__main__":

@@ -22,7 +22,7 @@ const getApiBaseUrl = () => {
 const api = axios.create({
   baseURL: getApiBaseUrl(),
   headers: { 'Content-Type': 'application/json' },
-  timeout: 60000,
+  timeout: 45000,
 });
 
 api.interceptors.request.use(
@@ -66,7 +66,7 @@ api.interceptors.response.use(
       error.response?.data?.error;
     const message = serverMessage ||
       (error.code === 'ECONNABORTED'
-        ? 'The server took too long to respond. Please try again.'
+        ? 'The server is taking too long to respond. It may be waking up. Please wait a moment and try again.'
         : !error.response
           ? 'Cannot connect to SportIQ services. The backend may be waking up; please retry shortly.'
           : error.message || 'Request failed. Please try again.');

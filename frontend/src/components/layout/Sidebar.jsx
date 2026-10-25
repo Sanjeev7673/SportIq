@@ -100,7 +100,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
       {isOpen && (
         <div
           onClick={onClose}
-          className="fixed inset-0 z-40 bg-[#0B1220]/80 backdrop-blur-sm lg:hidden transition-opacity"
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden transition-opacity"
         />
       )}
 
@@ -137,13 +137,13 @@ export const Sidebar = ({ isOpen, onClose }) => {
                     `flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all ${
                       isActive
                         ? item.isAI
-                          ? 'bg-[#06B6D4]/15 text-[#06B6D4] border border-[#06B6D4]/30 font-semibold'
-                          : 'bg-[#2563EB] text-[#F8FAFC] font-semibold shadow-sm'
+                          ? 'bg-[#ff6a4d]/10 text-[#ff6a4d] border border-[#ff6a4d]/30 font-semibold'
+                          : 'bg-[#ff251f] text-white font-semibold shadow-sm'
                         : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[var(--bg-card)]'
                     }`
                   }
                 >
-                  <Icon className={`w-4 h-4 shrink-0 ${item.isAI ? 'text-[#06B6D4]' : ''}`} />
+                  <Icon className={`w-4 h-4 shrink-0 ${item.isAI ? 'text-[#ff6a4d]' : ''}`} />
                   <span className="truncate">{item.name}</span>
                 </NavLink>
               );

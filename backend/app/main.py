@@ -9,6 +9,7 @@ from __future__ import annotations
 import os
 import secrets
 import hashlib
+import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Literal
@@ -101,6 +102,7 @@ class PerformanceReport(Base):
     strengths: Mapped[str] = mapped_column(Text, default="")
     improvements: Mapped[str] = mapped_column(Text, default="")
     analysis_status: Mapped[str] = mapped_column(String(30), default="baseline_pending_ai")
+    analysis_metrics: Mapped[str] = mapped_column(Text, default="{}")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 class Coach(Base):
@@ -156,6 +158,7 @@ with engine.begin() as connection:
         "ALTER TABLE users ADD COLUMN email_verified BOOLEAN NOT NULL DEFAULT FALSE",
         "ALTER TABLE users ADD COLUMN phone VARCHAR(20)",
         "ALTER TABLE users ADD COLUMN phone_verified BOOLEAN NOT NULL DEFAULT FALSE",
+        "ALTER TABLE performance_reports ADD COLUMN analysis_metrics TEXT NOT NULL DEFAULT '{}'",
     ):
         try:
             connection.exec_driver_sql(migration)
@@ -339,10 +342,17 @@ async def upload_performance_video(sport: str = Form(...), discipline: str = For
         target.unlink(missing_ok=True); raise
     finally:
         await video.close()
-    # Honest baseline report. Replace with validated CV/pose model output in the AI integration phase.
-    report = PerformanceReport(athlete_id=user.id, sport=sport.strip(), discipline=discipline.strip(), video_filename=filename, notes=notes.strip(), strengths="Video uploaded successfully. A coach can review the submitted footage.", improvements="Automated movement metrics are not yet available. Connect a validated pose-estimation pipeline to measure technique, timing and form.", analysis_status="awaiting_ai_model")
+    # Run experimental 2D pose estimation when CV dependencies are available. This does not
+    # claim validated sports timing, jump distance, or competition-grade biomechanics.
+    from app.sport_analysis import analyze_video
+    analysis = analyze_video(target, sport.strip(), discipline.strip())
+    strengths = analysis["summary"]
+    if analysis["status"] == "pose_metrics_available":
+        strengths += " The available measurements are experimental and should be reviewed by a qualified coach."
+    improvements = "Limitations: " + " ".join(analysis.get("limitations", []))
+    report = PerformanceReport(athlete_id=user.id, sport=sport.strip(), discipline=discipline.strip(), video_filename=filename, notes=notes.strip(), strengths=strengths, improvements=improvements, analysis_status=analysis["status"], analysis_metrics=json.dumps(analysis.get("metrics", {})))
     db.add(report); db.commit(); db.refresh(report)
-    return {"success": True, "report_id": report.id, "analysis_status": report.analysis_status, "uploaded_bytes": size, "message": "Video saved. This MVP does not yet run computer-vision analysis; the report clearly marks that limitation."}
+    return {"success": True, "report_id": report.id, "analysis_status": report.analysis_status, "analysis": analysis, "uploaded_bytes": size, "message": "Video saved. Experimental pose metrics are not a validated athletic performance score."}
 
 @app.get("/api/v1/reports")
 def list_reports(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -350,7 +360,7 @@ def list_reports(user: User = Depends(get_current_user), db: Session = Depends(g
     return {"success": True, "reports": [report_json(r) for r in reports]}
 
 def report_json(r: PerformanceReport):
-    return {"id": r.id, "sport": r.sport, "discipline": r.discipline, "notes": r.notes, "strengths": r.strengths, "improvements": r.improvements, "analysis_status": r.analysis_status, "created_at": r.created_at.isoformat(), "qr_url": f"/api/v1/reports/{r.id}/qr"}
+    return {"id": r.id, "sport": r.sport, "discipline": r.discipline, "notes": r.notes, "strengths": r.strengths, "improvements": r.improvements, "analysis_status": r.analysis_status, "analysis_metrics": json.loads(r.analysis_metrics or "{}"), "created_at": r.created_at.isoformat(), "qr_url": f"/api/v1/reports/{r.id}/qr"}
 
 def owned_report(report_id: int, user: User, db: Session):
     r = db.get(PerformanceReport, report_id)

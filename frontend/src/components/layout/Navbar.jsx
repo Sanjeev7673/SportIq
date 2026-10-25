@@ -61,19 +61,19 @@ export const Navbar = ({ onToggleSidebar }) => {
   const totalNotifCount = notifications.reduce((acc, n) => acc + (n.count || 0), 0);
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-[#1E293B] bg-[#111C2E] px-4 sm:px-6 transition-colors duration-200">
+    <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-[var(--border-color)] bg-[var(--bg-card)] px-4 sm:px-6 transition-colors duration-200">
       <div className="flex items-center gap-3">
         <button
           onClick={onToggleSidebar}
           aria-label="Toggle navigation menu"
-          className="p-2 text-[#94A3B8] hover:text-[#F8FAFC] rounded-lg hover:bg-[#16243B] lg:hidden transition-colors"
+          className="p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded-lg hover:bg-[#16243B] lg:hidden transition-colors"
         >
           <Menu className="w-5 h-5" />
         </button>
 
         <Link to="/" className="flex items-center gap-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#2563EB] shadow-sm">
-            <Activity className="h-5 w-5 text-[#F8FAFC]" />
+            <Activity className="h-5 w-5 text-[var(--text-primary)]" />
           </div>
           <span className="font-display text-xl font-bold tracking-tight text-[#F8FAFC]">
             Sport<span className="text-[#06B6D4]">IQ</span>

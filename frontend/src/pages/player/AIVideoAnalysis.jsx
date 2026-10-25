@@ -124,6 +124,10 @@ export const AIVideoAnalysis = () => {
 
   const handleUploadSubmit = async (e) => {
     e.preventDefault();
+    if (import.meta.env.VITE_DEMO_MODE === 'true') {
+      setUploadError('Demo preview only: your video is selected on this device, but server upload and AI processing are not connected. No analysis has been generated.');
+      return;
+    }
     if (!videoFile) {
       setUploadError('Please select a video file to upload.');
       return;

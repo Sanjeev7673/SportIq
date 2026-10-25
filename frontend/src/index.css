@@ -4,70 +4,70 @@
 
 :root {
   /* SportIQ Fixed Palette Variables */
-  --sportiq-bg: #0B1220;
-  --sportiq-card: #111C2E;
-  --sportiq-card-hover: #16243B;
-  --sportiq-surface: #0E1726;
-  --sportiq-border: #1E293B;
+  --sportiq-bg: #090808;
+  --sportiq-card: #171616;
+  --sportiq-card-hover: #242222;
+  --sportiq-surface: #101010;
+  --sportiq-border: #343131;
   --sportiq-border-subtle: rgba(148, 163, 184, 0.12);
-  --sportiq-primary: #2563EB;
-  --sportiq-primary-hover: #1D4ED8;
-  --sportiq-ai: #06B6D4;
-  --sportiq-ai-hover: #0891B2;
+  --sportiq-primary: #F71601;
+  --sportiq-primary-hover: #D91402;
+  --sportiq-ai: #F71601;
+  --sportiq-ai-hover: #D91402;
   --sportiq-success: #22C55E;
   --sportiq-warning: #F59E0B;
   --sportiq-error: #EF4444;
-  --sportiq-text: #F8FAFC;
-  --sportiq-muted: #94A3B8;
+  --sportiq-text: #ECEBEC;
+  --sportiq-muted: #AFAFAF;
 
   /* Theme mappings (Default Deep Navy) */
-  --bg-main: #0B1220;
-  --bg-card: #111C2E;
-  --bg-card-hover: #16243B;
-  --bg-surface: #0E1726;
-  --text-primary: #F8FAFC;
-  --text-secondary: #94A3B8;
-  --text-muted: #64748B;
-  --border-color: #1E293B;
+  --bg-main: #090808;
+  --bg-card: #171616;
+  --bg-card-hover: #242222;
+  --bg-surface: #101010;
+  --text-primary: #ECEBEC;
+  --text-secondary: #AFAFAF;
+  --text-muted: #777373;
+  --border-color: #343131;
   --border-subtle: rgba(148, 163, 184, 0.12);
-  --input-bg: #111C2E;
-  --input-border: #1E293B;
-  --scrollbar-track: #0B1220;
-  --scrollbar-thumb: #1E293B;
+  --input-bg: #171616;
+  --input-border: #343131;
+  --scrollbar-track: #090808;
+  --scrollbar-thumb: #343131;
   --scrollbar-thumb-hover: #334155;
 }
 
 .light {
-  --bg-main: #F1F5F9;
-  --bg-card: #FFFFFF;
-  --bg-card-hover: #F8FAFC;
-  --bg-surface: #FFFFFF;
-  --text-primary: #0F172A;
-  --text-secondary: #475569;
-  --text-muted: #64748B;
-  --border-color: #E2E8F0;
-  --border-subtle: #F1F5F9;
-  --input-bg: #FFFFFF;
-  --input-border: #CBD5E1;
-  --scrollbar-track: #F1F5F9;
-  --scrollbar-thumb: #CBD5E1;
-  --scrollbar-thumb-hover: #94A3B8;
+  --bg-main: #ECEBEC;
+  --bg-card: #ECEBEC;
+  --bg-card-hover: #ECEBEC;
+  --bg-surface: #ECEBEC;
+  --text-primary: #090808;
+  --text-secondary: #4A4545;
+  --text-muted: #777373;
+  --border-color: #D5D2D2;
+  --border-subtle: #ECEBEC;
+  --input-bg: #ECEBEC;
+  --input-border: #BDB9B9;
+  --scrollbar-track: #ECEBEC;
+  --scrollbar-thumb: #BDB9B9;
+  --scrollbar-thumb-hover: #AFAFAF;
 }
 
 .dark {
-  --bg-main: #0B1220;
-  --bg-card: #111C2E;
-  --bg-card-hover: #16243B;
-  --bg-surface: #0E1726;
-  --text-primary: #F8FAFC;
-  --text-secondary: #94A3B8;
-  --text-muted: #64748B;
-  --border-color: #1E293B;
+  --bg-main: #090808;
+  --bg-card: #171616;
+  --bg-card-hover: #242222;
+  --bg-surface: #101010;
+  --text-primary: #ECEBEC;
+  --text-secondary: #AFAFAF;
+  --text-muted: #777373;
+  --border-color: #343131;
   --border-subtle: rgba(148, 163, 184, 0.12);
-  --input-bg: #111C2E;
-  --input-border: #1E293B;
-  --scrollbar-track: #0B1220;
-  --scrollbar-thumb: #1E293B;
+  --input-bg: #171616;
+  --input-border: #343131;
+  --scrollbar-track: #090808;
+  --scrollbar-thumb: #343131;
   --scrollbar-thumb-hover: #334155;
 }
 
@@ -86,14 +86,14 @@
 
 /* Card & Surface Classes */
 .sportiq-card {
-  background-color: #111C2E;
-  border: 1px solid #1E293B;
+  background-color: #171616;
+  border: 1px solid #343131;
   border-radius: 1rem;
   transition: all 0.2s ease-in-out;
 }
 
 .sportiq-card-hover:hover {
-  background-color: #16243B;
+  background-color: #242222;
   border-color: rgba(37, 99, 235, 0.4);
 }
 
@@ -293,20 +293,20 @@ main {
    modals and forms on the same deep-navy visual system.
    ========================================================== */
 :root {
-  --sportiq-bg: #0B1220;
-  --sportiq-card: #111C2E;
-  --sportiq-card-hover: #16243B;
-  --sportiq-surface: #0E1726;
-  --sportiq-border: #1E293B;
-  --sportiq-primary: #2563EB;
-  --sportiq-ai: #06B6D4;
-  --sportiq-text: #F8FAFC;
-  --sportiq-muted: #94A3B8;
+  --sportiq-bg: #090808;
+  --sportiq-card: #171616;
+  --sportiq-card-hover: #242222;
+  --sportiq-surface: #101010;
+  --sportiq-border: #343131;
+  --sportiq-primary: #F71601;
+  --sportiq-ai: #F71601;
+  --sportiq-text: #ECEBEC;
+  --sportiq-muted: #AFAFAF;
 }
 
 html[data-theme="dark"] body {
-  background-color: #0B1220;
-  color: #F8FAFC;
+  background-color: #090808;
+  color: #ECEBEC;
 }
 
 /* Normalize common Tailwind surfaces that otherwise stay bright on some routes. */
@@ -315,14 +315,14 @@ html[data-theme="dark"] [class~="bg-gray-50"],
 html[data-theme="dark"] [class~="bg-slate-50"],
 html[data-theme="dark"] [class~="bg-gray-100"],
 html[data-theme="dark"] [class~="bg-slate-100"] {
-  background-color: #111C2E !important;
+  background-color: #171616 !important;
 }
 
 html[data-theme="dark"] [class~="text-gray-900"],
 html[data-theme="dark"] [class~="text-gray-800"],
 html[data-theme="dark"] [class~="text-slate-900"],
 html[data-theme="dark"] [class~="text-slate-800"] {
-  color: #F8FAFC !important;
+  color: #ECEBEC !important;
 }
 
 html[data-theme="dark"] [class~="text-gray-700"],
@@ -331,34 +331,34 @@ html[data-theme="dark"] [class~="text-gray-500"],
 html[data-theme="dark"] [class~="text-slate-700"],
 html[data-theme="dark"] [class~="text-slate-600"],
 html[data-theme="dark"] [class~="text-slate-500"] {
-  color: #94A3B8 !important;
+  color: #AFAFAF !important;
 }
 
 html[data-theme="dark"] [class~="border-gray-100"],
 html[data-theme="dark"] [class~="border-gray-200"],
 html[data-theme="dark"] [class~="border-slate-100"],
 html[data-theme="dark"] [class~="border-slate-200"] {
-  border-color: #1E293B !important;
+  border-color: #343131 !important;
 }
 
 /* Consistent form controls across sign-in, registration, settings and modals. */
 html[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]),
 html[data-theme="dark"] textarea,
 html[data-theme="dark"] select {
-  color: #F8FAFC;
-  background-color: #111C2E;
-  border-color: #1E293B;
+  color: #ECEBEC;
+  background-color: #171616;
+  border-color: #343131;
 }
 
 html[data-theme="dark"] input::placeholder,
 html[data-theme="dark"] textarea::placeholder {
-  color: #64748B;
+  color: #777373;
 }
 
 html[data-theme="dark"] input:focus,
 html[data-theme="dark"] textarea:focus,
 html[data-theme="dark"] select:focus {
-  border-color: #2563EB;
+  border-color: #F71601;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, .18);
 }
 
@@ -367,12 +367,12 @@ html[data-theme="dark"] table thead,
 html[data-theme="dark"] [role="dialog"],
 html[data-theme="dark"] .modal,
 html[data-theme="dark"] .dropdown-menu {
-  background-color: #111C2E;
-  border-color: #1E293B;
+  background-color: #171616;
+  border-color: #343131;
 }
 
 html[data-theme="dark"] hr {
-  border-color: #1E293B;
+  border-color: #343131;
 }
 
 html[data-theme="dark"] a:not([class~="text-white"]) {
@@ -380,6 +380,49 @@ html[data-theme="dark"] a:not([class~="text-white"]) {
 }
 
 html[data-theme="dark"] ::selection {
-  color: #F8FAFC;
+  color: #ECEBEC;
   background: rgba(37, 99, 235, .42);
 }
+
+
+/* SportIQ club identity: black, stadium-paper white and pitch red */
+:root {
+  --sportiq-bg: #090808;
+  --sportiq-card: #171616;
+  --sportiq-card-hover: #242222;
+  --sportiq-surface: #101010;
+  --sportiq-border: #343131;
+  --sportiq-primary: #F71601;
+  --sportiq-primary-hover: #D91402;
+  --sportiq-ai: #F71601;
+  --sportiq-ai-hover: #D91402;
+  --sportiq-text: #ECEBEC;
+  --sportiq-muted: #AFAFAF;
+  --bg-main: #090808;
+  --bg-card: #171616;
+  --bg-card-hover: #242222;
+  --bg-surface: #101010;
+  --text-primary: #ECEBEC;
+  --text-secondary: #AFAFAF;
+  --text-muted: #777373;
+  --border-color: #343131;
+  --input-bg: #171616;
+  --input-border: #343131;
+  --scrollbar-track: #090808;
+  --scrollbar-thumb: #343131;
+  --scrollbar-thumb-hover: #555050;
+}
+html, body { background: #090808; color: #ECEBEC; }
+.sportiq-card { background: #171616; border-color: #343131; }
+.sportiq-card-hover:hover, .sportiq-card:hover { border-color: rgba(247,22,1,.48); }
+button:focus-visible, a:focus-visible, [role="button"]:focus-visible { outline-color: #F71601; }
+input:focus, textarea:focus, select:focus { box-shadow: 0 0 0 3px rgba(247,22,1,.16); }
+::selection { background: rgba(247,22,1,.35); color: #ECEBEC; }
+
+/* Replace legacy blue/cyan utility accents with the SportIQ pitch-red identity. */
+[class*="text-[#2563EB]"], [class*="text-[#06B6D4]"],
+[class*="text-blue-"], [class*="text-cyan-"] { color: #F71601 !important; }
+[class*="bg-[#2563EB]"], [class*="bg-[#06B6D4]"],
+[class*="bg-blue-"], [class*="bg-cyan-"] { background-color: #F71601 !important; }
+[class*="border-[#2563EB]"], [class*="border-[#06B6D4]"],
+[class*="border-blue-"], [class*="border-cyan-"] { border-color: #F71601 !important; }

@@ -22,20 +22,20 @@ export const Input = ({
   return (
     <div className="w-full">
       {label && (
-        <label htmlFor={id} className="block text-xs font-semibold uppercase tracking-wider text-[#b7b7b2] mb-1.5">
+        <label htmlFor={id} className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] mb-1.5">
           {label}
         </label>
       )}
       <div className="relative rounded-xl">
         {Icon && (
-          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#b7b7b2]">
+          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[var(--text-secondary)]">
             <Icon className="h-4 w-4" />
           </div>
         )}
         <input
           id={id}
           type={effectiveType}
-          className={`block w-full rounded-xl bg-[#101311] border border-[#303632] text-[#f8f6f2] placeholder-[#b7b7b2]/60 text-sm transition-all duration-200 ${
+          className={`block w-full rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--text-primary)] placeholder-[var(--text-muted)] text-sm transition-all duration-200 ${
             aiFocus
               ? 'focus:outline-none focus:ring-2 focus:ring-[#ff6a4d] focus:border-[#ff6a4d]'
               : 'focus:outline-none focus:ring-2 focus:ring-[#ff251f] focus:border-[#ff251f]'
@@ -49,7 +49,7 @@ export const Input = ({
             type="button"
             onClick={() => setShowPassword(!showPassword)}
             aria-label={showPassword ? "Hide password" : "Show password"}
-            className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[#b7b7b2] hover:text-[#f8f6f2] focus:outline-none transition-colors cursor-pointer"
+            className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] focus:outline-none transition-colors cursor-pointer"
           >
             {showPassword ? (
               <EyeOff className="h-4 w-4" aria-hidden="true" />

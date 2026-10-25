@@ -51,6 +51,8 @@ class User(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(120))
     email: Mapped[str] = mapped_column(String(254), unique=True, index=True)
+    phone: Mapped[str | None] = mapped_column(String(20), unique=True, index=True, nullable=True)
+    phone_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     password_hash: Mapped[str] = mapped_column(String(255))
     role: Mapped[str] = mapped_column(String(20), default="athlete")
     email_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
@@ -141,6 +143,9 @@ app = FastAPI(title="SportIQ API", version="0.1.0", description="Athlete develop
 origins = [x.strip() for x in os.getenv("BACKEND_CORS_ORIGINS", "http://localhost:5173,http://localhost:3000,https://sportiq-theta.vercel.app").split(",") if x.strip()]
 app.add_middleware(CORSMiddleware, allow_origins=origins, allow_origin_regex=r"^https://.*\.vercel\.app$", allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
+from otp_router import router as otp_router
+app.include_router(otp_router, prefix="/api/v1")
+
 def get_db():
     db = SessionLocal()
     try:
@@ -174,6 +179,7 @@ def get_current_user(authorization: str | None = Header(default=None), db: Sessi
 class RegisterIn(BaseModel):
     name: str = Field(min_length=2, max_length=120)
     email: EmailStr
+    phone: str | None = Field(default=None, pattern=r"^\+[1-9]\d{7,14}$")
     password: str = Field(min_length=8, max_length=72)
     role: Literal["athlete", "coach", "sponsor"] = "athlete"
 
@@ -227,7 +233,7 @@ class EventIn(BaseModel):
     description: str = Field(default="", max_length=3000)
 
 def user_json(u: User):
-    return {"id": u.id, "name": u.name, "email": u.email, "role": u.role, "email_verified": u.email_verified, "created_at": u.created_at.isoformat()}
+    return {"id": u.id, "name": u.name, "email": u.email, "role": u.role, "email_verified": u.email_verified, "phone": u.phone, "phone_verified": u.phone_verified, "created_at": u.created_at.isoformat()}
 
 @app.get("/")
 def root():
@@ -242,7 +248,9 @@ def register(payload: RegisterIn, db: Session = Depends(get_db)):
     email = str(payload.email).lower()
     if db.query(User).filter(User.email == email).first():
         raise HTTPException(status_code=409, detail="An account with this email already exists")
-    user = User(name=payload.name.strip(), email=email, password_hash=pwd_context.hash(payload.password), role=payload.role)
+    if payload.phone and db.query(User).filter(User.phone == payload.phone).first():
+        raise HTTPException(status_code=409, detail="An account with this phone number already exists")
+    user = User(name=payload.name.strip(), email=email, phone=payload.phone, password_hash=pwd_context.hash(payload.password), role=payload.role)
     db.add(user); db.commit(); db.refresh(user)
     return {"success": True, "user": user_json(user), "verification_required": True, "message": "Account created. Verify your email with the registration OTP before logging in."}
 

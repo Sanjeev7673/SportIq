@@ -24,13 +24,13 @@ export const PlayerProfile = () => {
   const [previewUrl, setPreviewUrl] = useState(null);
 
   const [formData, setFormData] = useState({
-    sport: 'Football',
-    position: 'Forward',
-    age: 20,
-    gender: 'Male',
-    experience: 3,
-    height: 180,
-    weight: 75,
+    sport: '',
+    position: '',
+    age: '',
+    gender: '',
+    experience: '',
+    height: '',
+    weight: '',
     achievements: '',
     profile_image: '',
   });
@@ -53,13 +53,13 @@ export const PlayerProfile = () => {
         if (data) {
           setProfile(data);
           setFormData({
-            sport: data.sport || 'Football',
+            sport: data.sport || '',
             position: data.position || '',
-            age: data.age || 20,
-            gender: data.gender || 'Male',
-            experience: data.experience || 0,
-            height: data.height || 180,
-            weight: data.weight || 75,
+            age: data.age ?? '',
+            gender: data.gender || '',
+            experience: data.experience ?? '',
+            height: data.height ?? '',
+            weight: data.weight ?? '',
             achievements: data.achievements || '',
             profile_image: data.profile_image || '',
           });

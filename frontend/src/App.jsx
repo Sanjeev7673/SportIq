@@ -57,12 +57,14 @@ import SportManagement from './pages/admin/SportManagement';
 import SystemAnalytics from './pages/admin/SystemAnalytics';
 
 import { USER_ROLES } from './utils/constants';
+import CursorEffects from './components/common/CursorEffects';
 
 function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
         <BrowserRouter>
+          <CursorEffects />
           <Routes>
             {/* Public Landing & Authentication */}
             <Route path="/" element={<LandingPage />} />

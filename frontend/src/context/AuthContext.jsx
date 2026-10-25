@@ -19,6 +19,14 @@ export const AuthProvider = ({ children }) => {
 
     const initAuth = async () => {
       const currentToken = authService.getToken();
+      if (currentToken === 'sportiq-demo-session' && import.meta.env.VITE_DEMO_MODE === 'true') {
+        if (active) {
+          setUser(authService.getCurrentUser());
+          setToken(currentToken);
+          setLoading(false);
+        }
+        return;
+      }
       if (!currentToken) {
         if (active) {
           setUser(null);
@@ -61,6 +69,18 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (identifier, password) => {
+    if (import.meta.env.VITE_DEMO_MODE === 'true') {
+      const data = {
+        access_token: 'sportiq-demo-session',
+        user: { id: 'demo-player', name: 'Demo Player', email: identifier.trim(), role: 'PLAYER' },
+      };
+      localStorage.setItem('sportiq_token', data.access_token);
+      localStorage.setItem('sportiq_user', JSON.stringify(data.user));
+      setUser(data.user);
+      setToken(data.access_token);
+      setLoading(false);
+      return data;
+    }
     const data = await authService.login({
       username: identifier,
       email: identifier,

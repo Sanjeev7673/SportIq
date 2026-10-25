@@ -76,7 +76,7 @@ export const AIAnalysisPage = () => {
     );
   }
 
-  const dataConf = latestAI.data_confidence_score || (stats?.avg_data_confidence_score || 70.0);
+  const dataConf = latestAI.data_confidence_score ?? stats?.avg_data_confidence_score ?? null;
 
   return (
     <div className="space-y-6">
@@ -124,13 +124,13 @@ export const AIAnalysisPage = () => {
                 <ShieldCheck className="w-3.5 h-3.5 text-[#06B6D4]" /> Evidence Confidence
               </span>
               <span className={`font-bold px-2 py-0.5 rounded-full border text-xs ${getConfidenceColor(dataConf)}`}>
-                {dataConf.toFixed(0)}%
+                {dataConf == null ? 'Not available' : `${Number(dataConf).toFixed(0)}%`}
               </span>
             </div>
             <div className="w-full bg-[#1E293B] rounded-full h-1.5 overflow-hidden">
               <div
                 className="h-full bg-[#06B6D4]"
-                style={{ width: `${Math.min(Math.max(dataConf, 10), 100)}%` }}
+                style={{ width: `${dataConf == null ? 0 : Math.min(Math.max(Number(dataConf), 0), 100)}%` }}
               />
             </div>
             <span className="text-[10px] text-[#94A3B8] block">
@@ -142,11 +142,11 @@ export const AIAnalysisPage = () => {
         {/* Radar */}
         <Card title="5-Pillar Position Radar" subtitle="Calculated based on your specific playing role" className="md:col-span-2">
           <TalentRadarChart
-            speed={stats?.avg_speed || 70}
-            stamina={stats?.avg_stamina || 70}
-            strength={stats?.avg_strength || 70}
-            agility={stats?.avg_agility || 70}
-            accuracy={stats?.avg_accuracy || 70}
+            speed={stats?.avg_speed ?? 0}
+            stamina={stats?.avg_stamina ?? 0}
+            strength={stats?.avg_strength ?? 0}
+            agility={stats?.avg_agility ?? 0}
+            accuracy={stats?.avg_accuracy ?? 0}
             height={260}
           />
         </Card>

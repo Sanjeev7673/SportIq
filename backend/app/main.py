@@ -19,7 +19,13 @@ from typing import Literal
 import qrcode
 from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
+from io import BytesIO
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import mm
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table as PDFTable, TableStyle, Image as PDFImage
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel, EmailStr, Field
@@ -416,10 +422,12 @@ async def upload_performance_video(sport: str = Form(...), discipline: str = For
 @app.get("/api/v1/reports")
 def list_reports(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     reports = db.query(PerformanceReport).filter(PerformanceReport.athlete_id == user.id).order_by(PerformanceReport.created_at.desc()).all()
-    return {"success": True, "reports": [report_json(r) for r in reports]}
+    return {"success": True, "reports": [report_json(r, db) for r in reports]}
 
-def report_json(r: PerformanceReport):
-    return {"id": r.id, "sport": r.sport, "discipline": r.discipline, "video_filename": r.video_filename, "notes": r.notes, "strengths": r.strengths, "improvements": r.improvements, "analysis_status": r.analysis_status, "analysis_metrics": json.loads(r.analysis_metrics or "{}"), "created_at": r.created_at.isoformat(), "qr_url": f"/api/v1/reports/{r.id}/qr"}
+def report_json(r: PerformanceReport, db: Session):
+    athlete = db.get(User, r.athlete_id)
+    profile = db.query(AthleteProfile).filter(AthleteProfile.user_id == r.athlete_id).first()
+    return {"id": r.id, "athlete_id": r.athlete_id, "athlete_name": (athlete.name if athlete and athlete.name.strip() else "Athlete"), "athlete_profile": ({"age": profile.age, "height_cm": profile.height_cm, "weight_kg": profile.weight_kg, "sport": profile.sport, "discipline": profile.discipline} if profile else None), "sport": r.sport, "discipline": r.discipline, "video_filename": r.video_filename, "notes": r.notes, "strengths": r.strengths, "improvements": r.improvements, "analysis_status": r.analysis_status, "analysis_metrics": json.loads(r.analysis_metrics or "{}"), "created_at": r.created_at.isoformat(), "qr_url": f"/api/v1/reports/{r.id}/qr", "pdf_url": f"/api/v1/reports/{r.id}/pdf"}
 
 def owned_report(report_id: int, user: User, db: Session):
     r = db.get(PerformanceReport, report_id)
@@ -428,7 +436,58 @@ def owned_report(report_id: int, user: User, db: Session):
 
 @app.get("/api/v1/reports/{report_id}")
 def get_report(report_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    return {"success": True, "report": report_json(owned_report(report_id, user, db))}
+    return {"success": True, "report": report_json(owned_report(report_id, user, db), db)}
+
+@app.get("/api/v1/reports/{report_id}/pdf")
+def download_report_pdf(report_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    report = owned_report(report_id, user, db)
+    athlete = db.get(User, report.athlete_id)
+    profile = db.query(AthleteProfile).filter(AthleteProfile.user_id == report.athlete_id).first()
+    metrics = json.loads(report.analysis_metrics or "{}")
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=18*mm, leftMargin=18*mm, topMargin=16*mm, bottomMargin=16*mm)
+    styles = getSampleStyleSheet()
+    styles.add(ParagraphStyle(name="SportIQTitle", parent=styles["Title"], textColor=colors.HexColor("#063B5C"), fontSize=22, leading=26, spaceAfter=4))
+    styles.add(ParagraphStyle(name="SmallMuted", parent=styles["BodyText"], textColor=colors.HexColor("#526274"), fontSize=8, leading=11))
+    story = [Paragraph("SportIQ", styles["SportIQTitle"]), Paragraph("VIDEO PERFORMANCE ANALYSIS REPORT", styles["Heading2"]), Spacer(1, 5*mm)]
+    status_labels = {"pose_metrics_available":"Experimental pose measurements available","insufficient_pose_visibility":"Insufficient pose visibility","video_read_failed":"Video could not be decoded","pose_analysis_unavailable":"Pose analysis unavailable"}
+    info = [
+        ["Athlete", athlete.name if athlete and athlete.name.strip() else "Athlete", "Athlete ID", str(report.athlete_id)],
+        ["Report ID", f"SQ-{report.id:06d}", "Report date", report.created_at.strftime("%d %b %Y %H:%M UTC")],
+        ["Sport", report.sport or "Unspecified", "Activity / drill", report.discipline or "General video review"],
+        ["Video file", report.video_filename, "Analysis status", status_labels.get(report.analysis_status, report.analysis_status.replace("_"," ").title())],
+    ]
+    if profile:
+        info.append(["Profile age", str(profile.age) if profile.age else "Not provided", "Height / weight", f"{profile.height_cm or '—'} cm / {profile.weight_kg or '—'} kg"])
+    table = PDFTable(info, colWidths=[27*mm, 58*mm, 28*mm, 55*mm])
+    table.setStyle(TableStyle([("BACKGROUND",(0,0),(-1,-1),colors.HexColor("#F2F7FA")),("TEXTCOLOR",(0,0),(-1,-1),colors.HexColor("#163247")),("GRID",(0,0),(-1,-1),0.4,colors.HexColor("#D5E1E8")),("FONTNAME",(0,0),(-1,-1),"Helvetica"),("FONTSIZE",(0,0),(-1,-1),8),("VALIGN",(0,0),(-1,-1),"TOP"),("LEFTPADDING",(0,0),(-1,-1),6),("RIGHTPADDING",(0,0),(-1,-1),6),("TOPPADDING",(0,0),(-1,-1),6),("BOTTOMPADDING",(0,0),(-1,-1),6)]))
+    story.extend([table, Spacer(1, 7*mm), Paragraph("ANALYSIS SUMMARY", styles["Heading2"]), Paragraph((report.strengths or "No analysis summary available.").replace("&","&amp;").replace("<","&lt;").replace(">","&gt;"), styles["BodyText"]), Spacer(1, 4*mm), Paragraph("OBSERVED VIDEO METRICS", styles["Heading2"])])
+    metric_rows = [["Metric", "Observed value", "Interpretation"]]
+    for key, value in metrics.items():
+        if isinstance(value, dict) and "mean" in value:
+            unit = "°" if "angle" in key else ""
+            observed = f'{value.get("mean","—")}{unit} (range {value.get("minimum","—")}–{value.get("maximum","—")}{unit}; n={value.get("samples","—")})'
+        elif value is not None and not isinstance(value, (dict, list)):
+            observed = str(value) + ("%" if "percent" in key else "")
+        else:
+            continue
+        metric_rows.append([key.replace("_"," ").title(), observed, "Experimental 2D computer-vision observation"])
+    if len(metric_rows) == 1:
+        metric_rows.append(["No measurable metrics", "—", "The model did not return usable measurements for this video"])
+    mt = PDFTable(metric_rows, colWidths=[48*mm, 55*mm, 65*mm], repeatRows=1)
+    mt.setStyle(TableStyle([("BACKGROUND",(0,0),(-1,0),colors.HexColor("#063B5C")),("TEXTCOLOR",(0,0),(-1,0),colors.white),("GRID",(0,0),(-1,-1),0.35,colors.HexColor("#D5E1E8")),("FONTSIZE",(0,0),(-1,-1),8),("VALIGN",(0,0),(-1,-1),"TOP"),("LEFTPADDING",(0,0),(-1,-1),5),("RIGHTPADDING",(0,0),(-1,-1),5),("TOPPADDING",(0,0),(-1,-1),5),("BOTTOMPADDING",(0,0),(-1,-1),5)]))
+    story.extend([mt, Spacer(1, 5*mm), Paragraph("AREAS TO REVIEW / LIMITATIONS", styles["Heading2"]), Paragraph((report.improvements or "No additional limitations were returned.").replace("&","&amp;").replace("<","&lt;").replace(">","&gt;"), styles["BodyText"])])
+    if report.notes:
+        story.extend([Spacer(1, 4*mm), Paragraph("ATHLETE NOTES", styles["Heading2"]), Paragraph(report.notes.replace("&","&amp;").replace("<","&lt;").replace(">","&gt;"), styles["BodyText"])])
+    qr_target = f"https://sportiq-theta.vercel.app/player/video-analysis?report={report.id}"
+    qr_image = qrcode.make(qr_target)
+    qr_buffer = BytesIO()
+    qr_image.save(qr_buffer, format="PNG")
+    qr_buffer.seek(0)
+    story.extend([Spacer(1, 6*mm), PDFImage(qr_buffer, width=28*mm, height=28*mm), Paragraph("QR opens SportIQ video analysis. Sign-in may be required to view the full report.", styles["SmallMuted"]), Spacer(1, 3*mm), Paragraph("Important: These are experimental 2D video observations, not a validated athletic score, medical opinion, or injury-risk assessment. Camera angle, lighting, framing and occlusion affect accuracy. Review findings with a qualified coach.", styles["SmallMuted"])])
+    doc.build(story)
+    buffer.seek(0)
+    return StreamingResponse(buffer, media_type="application/pdf", headers={"Content-Disposition": f'attachment; filename="SportIQ-Report-{report.id}.pdf"'})
 
 @app.get("/api/v1/reports/{report_id}/qr")
 def report_qr(report_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)):

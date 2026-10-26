@@ -106,14 +106,14 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
 
+            {/* Public presentation dashboard: no login required. */}
+            <Route path="/player/dashboard" element={<PlayerDashboard />} />
+
             {/* Dashboard Shell */}
             <Route element={<DashboardLayout />}>
               {/* Event Hub (Accessible to all logged in users & roles) */}
               <Route path="/events" element={<EventHubPage />} />
               <Route path="/events/:id" element={<EventDetailPage />} />
-
-              {/* Dashboard preview is directly accessible from the landing page. */}
-              <Route path="/player/dashboard" element={<PlayerDashboard />} />
 
               {/* Player Protected Routes */}
               <Route element={<ProtectedRoute allowedRoles={[USER_ROLES.PLAYER, USER_ROLES.ADMIN]} />}>

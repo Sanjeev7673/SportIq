@@ -103,8 +103,13 @@ function App() {
           <Routes>
             {/* Public Landing & Authentication */}
             <Route path="/" element={<LandingPage />} />
+            <Route path="/player/dashboard" element={<PlayerDashboard />} />
+            <Route path="/player/video-analysis" element={<AIVideoAnalysis />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+
+            {/* Public presentation dashboard: no login required. */}
+            <Route path="/player/dashboard" element={<PlayerDashboard />} />
 
             {/* Dashboard Shell */}
             <Route element={<DashboardLayout />}>
@@ -114,7 +119,6 @@ function App() {
 
               {/* Player Protected Routes */}
               <Route element={<ProtectedRoute allowedRoles={[USER_ROLES.PLAYER, USER_ROLES.ADMIN]} />}>
-                <Route path="/player/dashboard" element={<PlayerDashboard />} />
                 <Route path="/player/tasks" element={<Navigate to="/player/dashboard" replace />} />
                 <Route path="/player/profile" element={<PlayerProfile />} />
                 <Route path="/player/performance" element={<PlayerPerformance />} />

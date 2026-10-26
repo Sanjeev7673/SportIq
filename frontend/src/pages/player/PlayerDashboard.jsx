@@ -25,6 +25,7 @@ import { getPotentialBadgeColor, getScoreColor, getImageUrl } from '../../utils/
 
 export const PlayerDashboard = () => {
   const { user } = useAuth();
+  const showcaseMode = new URLSearchParams(window.location.search).get('showcase') === '1';
   const [profile, setProfile] = useState(null);
   const [stats, setStats] = useState(null);
   const [history, setHistory] = useState([]);
@@ -66,6 +67,11 @@ export const PlayerDashboard = () => {
   };
 
   useEffect(() => {
+    if (showcaseMode) {
+      setProfile({ id: 'showcase-sanjeev', name: 'Sanjeev', sport: 'Football', position: 'Forward', experience: 3, age: 20, height: 186, weight: 86 });
+      setStats({ avg_speed: 28.4, max_speed: 31.2, total_matches_played: 12, avg_stamina: 78, avg_strength: 74, avg_agility: 82, avg_accuracy: 80 });
+      setHistory([]); setLatestAI(null); setRecommendations([]); setLoading(false); return;
+    }
     if (import.meta.env.VITE_DEMO_MODE === 'true') {
       // Keep demo preview independent of the unavailable backend.
       let savedProfile = null;
@@ -180,7 +186,7 @@ export const PlayerDashboard = () => {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <h1 className="text-2xl sm:text-3xl font-extrabold text-[#F8FAFC] font-display tracking-tight">
-                Welcome back, {user?.name || 'Athlete'}
+                Welcome back, {user?.name || profile.name || 'Sanjeev'}
               </h1>
               <Badge variant="primary" className="text-[10px]">{profile.sport}</Badge>
             </div>

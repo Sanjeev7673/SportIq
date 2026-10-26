@@ -198,7 +198,7 @@ export const PlayerDashboard = () => {
 
         <div className="flex items-center gap-3">
           <Link to="/player/profile"><Button variant="secondary" size="sm" icon={User}>Edit Profile</Button></Link>
-          <Link to="/player/video-analysis">
+          <Link to={showcaseMode ? "/player/video-analysis?showcase=1" : "/player/video-analysis"}>
             <Button
               variant="secondary"
               size="sm"

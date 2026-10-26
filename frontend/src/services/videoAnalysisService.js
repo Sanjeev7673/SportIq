@@ -87,6 +87,8 @@ export const videoAnalysisService = {
     return response;
   },
 
+  downloadReportPdf: async (assessmentId) => api.get(`/reports/${assessmentId}/pdf`, { responseType: 'blob' }),
+
   getAssessmentDetail: async (assessmentId) => {
     const response = await api.get(`/reports/${assessmentId}`);
     return reportToAssessment(response?.report || {});

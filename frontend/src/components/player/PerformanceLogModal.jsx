@@ -29,19 +29,20 @@ export const PerformanceLogModal = ({
   onSubmit,
   loading = false,
 }) => {
-  const [formData, setFormData] = useState({
-    speed: 80,
-    stamina: 80,
-    strength: 80,
-    agility: 80,
-    accuracy: 80,
-    matches_played: 1,
+  const emptyForm = () => ({
+    speed: '',
+    stamina: '',
+    strength: '',
+    agility: '',
+    accuracy: '',
+    matches_played: '',
     assessment_date: new Date().toISOString().split('T')[0],
-    source_type: 'STANDARDIZED_FIELD_TEST',
-    field_test_protocol: '30m Sprint',
+    source_type: 'SELF_REPORTED_MANUAL',
+    field_test_protocol: '',
     evidence_url: '',
     verification_notes: ''
   });
+  const [formData, setFormData] = useState(emptyForm);
 
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [evidenceFile, setEvidenceFile] = useState(null);
@@ -80,7 +81,7 @@ export const PerformanceLogModal = ({
     const previewUrl = URL.createObjectURL(file);
     setEvidencePreview(previewUrl);
 
-    if (isOnline) {
+    if (isOnline && import.meta.env.VITE_DEMO_MODE !== 'true') {
       setUploadingEvidence(true);
       try {
         const res = await performanceService.uploadEvidence(file);
@@ -113,7 +114,7 @@ export const PerformanceLogModal = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!isOnline) {
+    if (!isOnline && import.meta.env.VITE_DEMO_MODE !== 'true') {
       // Offline fallback: save to offlineQueue
       offlineQueue.addLog(formData);
       alert('Offline Mode Active: Performance log saved locally. It will automatically sync when you reconnect to the internet.');
@@ -122,6 +123,12 @@ export const PerformanceLogModal = ({
     }
 
     try {
+      const requiredMetrics = ['speed', 'stamina', 'strength', 'agility', 'accuracy', 'matches_played'];
+      const missingMetric = requiredMetrics.some((key) => formData[key] === '' || formData[key] == null || !Number.isFinite(Number(formData[key])));
+      if (missingMetric) {
+        setUploadError('Enter your actual results for every required metric before saving. No sample values are prefilled.');
+        return;
+      }
       await onSubmit(formData);
     } catch (err) {
       // If network fails during submit, queue offline
@@ -141,7 +148,7 @@ export const PerformanceLogModal = ({
       subtitle="Device-inclusive performance logging with multi-source evidence verification"
       maxWidth="max-w-2xl"
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4" onReset={(e) => { e.preventDefault(); setFormData(emptyForm()); setEvidenceFile(null); setEvidencePreview(null); setUploadError(''); }}>
         {/* Connectivity Banner */}
         <div className={`p-2.5 rounded-xl border flex items-center justify-between text-xs ${
           isOnline
@@ -152,8 +159,8 @@ export const PerformanceLogModal = ({
             {isOnline ? <Wifi className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> : <WifiOff className="w-4 h-4 text-amber-600 dark:text-amber-400" />}
             <span>
               {isOnline
-                ? 'Online Mode: Real-time validation & AI assessment'
-                : 'Offline Mode (Rural/Field): Data will be safely stored on your device and synced when connected'}
+                ? (import.meta.env.VITE_DEMO_MODE === 'true' ? 'Connected: enter your actual measurements below' : 'Online Mode: Real-time validation & AI assessment')
+                : (import.meta.env.VITE_DEMO_MODE === 'true' ? 'Enter your actual measurements; values are saved locally' : 'Offline Mode (Rural/Field): Data will be safely stored on your device and synced when connected')}
             </span>
           </div>
         </div>

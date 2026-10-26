@@ -167,12 +167,13 @@ export const PlayerDashboard = () => {
               <Badge variant="primary" className="text-[10px]">{profile.sport}</Badge>
             </div>
             <p className="text-xs text-[#94A3B8]">
-              Position: <span className="text-[#F8FAFC] font-semibold">{profile.position || 'Not specified'}</span> • Experience: <span className="text-[#F8FAFC] font-semibold">{profile.experience || 0} years</span>
+              Position: <span className="text-[#F8FAFC] font-semibold">{profile.position || 'Not specified'}</span> • Experience: <span className="text-[#F8FAFC] font-semibold">{profile.experience != null && profile.experience !== '' ? `${profile.experience} years` : 'Not specified'}</span>
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
+          <Link to="/player/profile"><Button variant="secondary" size="sm" icon={User}>Edit Profile</Button></Link>
           <Link to="/player/video-analysis">
             <Button
               variant="secondary"
@@ -226,7 +227,7 @@ export const PlayerDashboard = () => {
           <span className="text-xs font-semibold uppercase tracking-wider text-[#94A3B8] block mb-1">Total Matches</span>
           <div className="flex items-baseline gap-2">
             <span className="text-3xl font-extrabold text-[#F8FAFC] font-display">
-              {stats?.total_matches_played || 0}
+              {stats?.total_matches_played ?? '--'}
             </span>
             <span className="text-xs text-[#94A3B8]">Sessions</span>
           </div>
@@ -237,19 +238,16 @@ export const PlayerDashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Radar Chart */}
         <Card title="5-Pillar Athletic Radar" subtitle="Multi-factor performance breakdown" className="lg:col-span-1">
-          <TalentRadarChart
-            speed={stats?.avg_speed ?? 0}
-            stamina={stats?.avg_stamina ?? 0}
-            strength={stats?.avg_strength ?? 0}
-            agility={stats?.avg_agility ?? 0}
-            accuracy={stats?.avg_accuracy ?? 0}
-            height={260}
-          />
+          {stats && [stats.avg_speed, stats.avg_stamina, stats.avg_strength, stats.avg_agility, stats.avg_accuracy].some((value) => value != null) ? (
+            <TalentRadarChart speed={stats.avg_speed ?? 0} stamina={stats.avg_stamina ?? 0} strength={stats.avg_strength ?? 0} agility={stats.avg_agility ?? 0} accuracy={stats.avg_accuracy ?? 0} height={260} />
+          ) : (
+            <p className="py-16 text-center text-sm text-[var(--text-secondary)]">No verified performance metrics yet. Add a performance log to populate this chart.</p>
+          )}
         </Card>
 
         {/* Progression Trend */}
         <Card title="Performance Progression" subtitle="Chronological performance trends" className="lg:col-span-2">
-          <PerformanceTrendChart records={history} height={260} />
+          {history.length > 0 ? <PerformanceTrendChart records={history} height={260} /> : <p className="py-16 text-center text-sm text-[var(--text-secondary)]">No performance history yet. Your trend will appear after you add a session.</p>}
         </Card>
       </div>
 

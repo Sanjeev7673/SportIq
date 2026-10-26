@@ -160,10 +160,8 @@ export const AIVideoAnalysis = () => {
         status: 'LOCAL_REVIEW_ONLY',
         processing_status: 'LOCAL_REVIEW_ONLY',
         local_review_only: true,
-        previewUrl: videoPreviewUrl,
       };
       const savedReview = { ...review };
-      delete savedReview.previewUrl;
       let existing = [];
       try { existing = JSON.parse(localStorage.getItem('sportiq_local_video_reviews') || '[]'); } catch { existing = []; }
       localStorage.setItem('sportiq_local_video_reviews', JSON.stringify([savedReview, ...existing]));

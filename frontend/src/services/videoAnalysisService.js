@@ -46,9 +46,13 @@ const reportToAssessment = (report) => {
     assessment_type: report?.discipline || 'General Review',
     original_filename: report?.video_filename || `Video report #${report?.id ?? ''}`,
     uploaded_at: report?.created_at,
-    status: status === 'pose_metrics_available' ? 'PENDING_VERIFICATION' : 'INSUFFICIENT_EVIDENCE',
+    status: status === 'pose_metrics_available' ? 'ANALYSIS_COMPLETE'
+      : status === 'insufficient_pose_visibility' ? 'ANALYSIS_LIMITED'
+      : status === 'pose_analysis_unavailable' ? 'ANALYSIS_UNAVAILABLE'
+      : status === 'video_read_failed' ? 'VIDEO_READ_FAILED' : 'ANALYSIS_PENDING',
     processing_status: status,
-    validation_status: status === 'pose_metrics_available' ? 'POSE_METRICS_AVAILABLE' : 'INSUFFICIENT_EVIDENCE',
+    validation_status: status === 'pose_metrics_available' ? 'POSE_METRICS_AVAILABLE'
+      : status === 'insufficient_pose_visibility' ? 'INSUFFICIENT_EVIDENCE' : status.toUpperCase(),
     analysis_result: {
       summary,
       observable_metrics: observableMetrics,
@@ -76,7 +80,17 @@ export const videoAnalysisService = {
     outgoing.append('discipline', formData.get('assessment_type') || 'General Review');
     outgoing.append('notes', formData.get('notes') || '');
     const file = formData.get('file') || formData.get('video');
-    if (file) outgoing.append('video', file, file.name);
+    if (!(file instanceof File)) {
+      throw new Error('Choose a video file before starting analysis.');
+    }
+    const allowedExtensions = /\.(mp4|mov|webm|mkv)$/i;
+    if (!(file.type.startsWith('video/') || allowedExtensions.test(file.name))) {
+      throw new Error('Unsupported video format. Choose MP4, MOV, WebM, or MKV.');
+    }
+    if (file.size > 250 * 1024 * 1024) {
+      throw new Error('Video exceeds the server limit of 250 MB.');
+    }
+    outgoing.append('video', file, file.name);
     const response = await api.post('/athletes/me/videos', outgoing, {
       onUploadProgress: (progressEvent) => {
         if (onUploadProgress && progressEvent.total) {

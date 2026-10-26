@@ -64,6 +64,7 @@ const reportToAssessment = (report) => {
       recommendations: aiCoachReview?.recommendations || [],
       limitations: report?.improvements || '',
     },
+    report_status: metrics?.report_status && typeof metrics.report_status === 'object' ? metrics.report_status : null,
     local_review_only: false,
     backend_report: true,
   };

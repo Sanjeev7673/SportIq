@@ -1,44 +1,32 @@
 import api from './api';
 
+// The shared Axios client already returns response.data. Do not unwrap .data again.
+const unwrap = (value) => value?.data ?? value;
+
 export const playerService = {
   async createProfile(data) {
-    const res = await api.post('/players/profile', data);
-    return res.data;
+    return unwrap(await api.post('/players/profile', data));
   },
-
   async getMyProfile() {
-    const res = await api.get('/players/profile/me');
-    return res.data;
+    return unwrap(await api.get('/players/profile/me'));
   },
-
   async updateMyProfile(data) {
-    const res = await api.put('/players/profile/me', data);
-    return res.data;
+    return unwrap(await api.put('/players/profile/me', data));
   },
-
   async uploadPhoto(file) {
     const formData = new FormData();
     formData.append('file', file);
-    const res = await api.post('/players/profile/photo', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    return res.data;
+    return unwrap(await api.post('/players/profile/photo', formData));
   },
-
   async deleteMyProfile() {
-    const res = await api.delete('/players/profile/me');
-    return res.data;
+    return unwrap(await api.delete('/players/profile/me'));
   },
-
   async listPlayers(params = {}) {
-    const res = await api.get('/players', { params });
-    return res.data;
+    return unwrap(await api.get('/players', { params }));
   },
-
   async getPlayerById(playerId) {
-    const res = await api.get(`/players/${playerId}`);
-    return res.data;
+    return unwrap(await api.get(`/players/${playerId}`));
   }
 };
+
+export default playerService;

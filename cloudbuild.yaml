@@ -1,0 +1,42 @@
+substitutions:
+  _REGION: asia-south1
+  _SERVICE: sportiq-api
+  _REPOSITORY: sportiq-containers
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+steps:
+  - name: gcr.io/cloud-builders/docker
+    id: Build SportIQ API
+    args:
+      - build
+      - -f
+      - backend/Dockerfile
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_SERVICE}:$COMMIT_SHA
+      - backend
+
+  - name: gcr.io/cloud-builders/docker
+    id: Push SportIQ API
+    args:
+      - push
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_SERVICE}:$COMMIT_SHA
+
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    id: Deploy SportIQ API
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - ${_SERVICE}
+      - --image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_SERVICE}:$COMMIT_SHA
+      - --region=${_REGION}
+      - --platform=managed
+      - --allow-unauthenticated
+      - --port=8080
+      - --memory=2Gi
+      - --cpu=2
+      - --timeout=900
+      - --max-instances=2
+      - --set-env-vars=BACKEND_CORS_ORIGINS=https://sportiq-theta.vercel.app,PUBLIC_API_URL=https://sportiq-theta.vercel.app

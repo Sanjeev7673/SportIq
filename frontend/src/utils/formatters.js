@@ -150,7 +150,8 @@ export const getImageUrl = (path) => {
         return 'http://127.0.0.1:8000';
       }
     }
-    return 'https://sportiq-2.onrender.com';
+    // Derive the server root from VITE_API_URL; never use a stale hosting URL.
+    return (import.meta.env.VITE_API_URL || '').replace(/\/api\/v1\/?$/, '').replace(/\/$/, '');
   };
 
   const backendBase = getServerBaseUrl();

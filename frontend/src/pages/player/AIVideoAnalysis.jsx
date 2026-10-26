@@ -4,6 +4,7 @@ import { playerService } from '../../services/playerService';
 import {
   Video,
   Upload,
+  Download,
   Play,
   CheckCircle2,
   XCircle,
@@ -215,6 +216,30 @@ export const AIVideoAnalysis = () => {
       console.error(err);
     } finally {
       setLoadingDetail(false);
+    }
+  };
+
+  useEffect(() => {
+    const requestedReport = new URLSearchParams(window.location.search).get('report');
+    if (!requestedReport || !/^\d+$/.test(requestedReport) || loading || !assessments.length) return;
+    const match = assessments.find((item) => String(item.id) === requestedReport);
+    if (match && !inspectAssessment) handleInspect(match);
+  }, [loading, assessments]);
+
+  const handleDownloadReport = async (assessment) => {
+    if (!assessment?.id || assessment.local_review_only) return;
+    try {
+      const blob = await videoAnalysisService.downloadReportPdf(assessment.id);
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = 'SportIQ-Report-' + assessment.id + '.pdf';
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      setUploadError(error.message || 'Could not download the report PDF.');
     }
   };
 
@@ -482,7 +507,7 @@ export const AIVideoAnalysis = () => {
           <EmptyState
             icon={Video}
             title="No Video Reviews Yet"
-            description="Select a training video to preview it and save your own review notes. This presentation build does not run an AI biomechanics model."
+            description="Upload a video to generate an analysis report when the backend analysis service is available."
             actionLabel="Upload Assessment Video"
             onAction={() => setIsUploadModalOpen(true)}
           />
@@ -639,7 +664,7 @@ export const AIVideoAnalysis = () => {
       <Modal
         isOpen={!!inspectAssessment}
         onClose={() => setInspectAssessment(null)}
-        title={`${inspectAssessment?.sport} • ${inspectAssessment?.assessment_type} — Video Performance Analysis`}
+        title={`${inspectAssessment?.sport} • ${inspectAssessment?.assessment_type} — SportIQ Report`}
         subtitle={`Assessment ID: #${inspectAssessment?.id} • Logged ${formatDate(inspectAssessment?.uploaded_at)}`}
         maxWidth="max-w-4xl"
       >
@@ -741,6 +766,14 @@ export const AIVideoAnalysis = () => {
         ) : (
           <div className="space-y-6">
             {/* Video Player & Score Summary */}
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="text-sm text-[#F8FAFC]">
+                <span className="text-[#94A3B8]">Athlete: </span>{inspectAssessment?.athlete_name || profile?.name || 'Athlete'}
+                <span className="text-[#64748B]"> · </span>
+                <span className="text-[#94A3B8]">Report ID: </span>SQ-{String(inspectAssessment?.id || '').padStart(6, '0')}
+              </div>
+              <Button onClick={() => handleDownloadReport(inspectAssessment)} variant="primary" size="sm" icon={Download}>Download Report PDF</Button>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="md:col-span-2 rounded-2xl overflow-hidden bg-black border border-[#1E293B] max-h-72">
                 {inspectAssessment?.video_url ? (
@@ -761,53 +794,15 @@ export const AIVideoAnalysis = () => {
 
               <div className="p-4 rounded-2xl bg-[#111C2E] border border-[#1E293B] flex flex-col justify-between space-y-4 shadow-sm">
                 <div>
-                  <span className="text-[10px] uppercase font-bold text-[#94A3B8] block mb-1">
-                    AI Performance Score
-                  </span>
-                  <div className="flex items-baseline gap-2">
-                    <span className={`text-4xl font-extrabold font-display ${getScoreColor(inspectAssessment?.analysis_result?.overall_score || 0)}`}>
-                      {inspectAssessment?.analysis_result?.overall_score ? Math.round(inspectAssessment.analysis_result.overall_score) : '--'}
-                    </span>
-                    <span className="text-xs text-[#94A3B8]">/ 100</span>
-                  </div>
+                  <span className="text-[10px] uppercase font-bold text-[#94A3B8] block mb-2">Analysis Status</span>
+                  <p className="text-lg font-bold text-[#F8FAFC]">{String(inspectAssessment?.processing_status || 'Report available').replaceAll('_', ' ')}</p>
+                  <p className="mt-2 text-xs text-[#94A3B8]">{inspectAssessment?.original_filename}</p>
+                  <p className="mt-3 text-xs text-amber-300">No unvalidated performance score or confidence percentage is shown.</p>
                 </div>
-
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-[#94A3B8] font-semibold flex items-center gap-1">
-                      <ShieldCheck className="w-3.5 h-3.5 text-[#06B6D4]" /> Analysis Confidence
-                    </span>
-                    <span className={`font-bold px-2 py-0.5 rounded-full border text-xs ${getConfidenceColor(inspectAssessment?.analysis_result?.analysis_confidence || 85)}`}>
-                      {inspectAssessment?.analysis_result?.analysis_confidence ? `${inspectAssessment.analysis_result.analysis_confidence}%` : '--'}
-                    </span>
-                  </div>
-                  <div className="w-full bg-[#1E293B] rounded-full h-1.5 overflow-hidden">
-                    <div
-                      className="h-full bg-[#06B6D4]"
-                      style={{ width: `${inspectAssessment?.analysis_result?.analysis_confidence ?? 0}%` }}
-                    />
-                  </div>
+                <div className="p-2.5 rounded-xl bg-[#F59E0B]/10 border border-[#F59E0B]/30 text-[11px] text-[#F59E0B]">
+                  <span className="font-bold flex items-center gap-1 mb-0.5"><Clock className="w-3.5 h-3.5" /> Experimental analysis</span>
+                  <p className="text-[#94A3B8] text-[10px]">Measurements need qualified coach interpretation.</p>
                 </div>
-
-                {inspectAssessment?.status === 'VERIFIED' ? (
-                  <div className="p-2.5 rounded-xl bg-[#22C55E]/10 border border-[#22C55E]/30 text-[11px] text-[#22C55E] space-y-0.5">
-                    <span className="font-bold flex items-center gap-1">
-                      <Lock className="w-3 h-3" /> Immutable Certified Evidence
-                    </span>
-                    <p className="text-[#94A3B8] text-[10px]">
-                      Verified by certified coach on {formatDate(inspectAssessment.verified_at)}.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="p-2.5 rounded-xl bg-[#F59E0B]/10 border border-[#F59E0B]/30 text-[11px] text-[#F59E0B]">
-                    <span className="font-bold flex items-center gap-1 mb-0.5">
-                      <Clock className="w-3.5 h-3.5" /> Pending Coach Verification
-                    </span>
-                    <p className="text-[#94A3B8] text-[10px]">
-                      Editable and deletable until certified by your coach.
-                    </p>
-                  </div>
-                )}
               </div>
             </div>
 

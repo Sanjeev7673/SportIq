@@ -222,6 +222,13 @@ export const AIVideoAnalysis = () => {
 
   const handleDeleteConfirm = async () => {
     if (!deleteTargetAssessment) return;
+    if (deleteTargetAssessment.local_review_only) {
+      const next = assessments.filter((item) => item.id !== deleteTargetAssessment.id);
+      localStorage.setItem('sportiq_local_video_reviews', JSON.stringify(next.map(({ previewUrl, ...item }) => item)));
+      setAssessments(next);
+      setDeleteTargetAssessment(null);
+      return;
+    }
     setDeleting(true);
     setDeleteError('');
     try {
@@ -391,6 +398,8 @@ export const AIVideoAnalysis = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
+      {localReviewMessage && <div role="status" className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-300">{localReviewMessage}</div>}
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#1E293B]">
         <div>
           <h1 className="text-2xl font-bold text-[#F8FAFC] font-display tracking-tight flex items-center gap-2.5">

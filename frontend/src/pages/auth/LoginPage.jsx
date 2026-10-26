@@ -87,7 +87,7 @@ export const LoginPage = () => {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {import.meta.env.VITE_DEMO_MODE === 'true' && (
+            {true && (
               <Input
                 label="Your name"
                 type="text"

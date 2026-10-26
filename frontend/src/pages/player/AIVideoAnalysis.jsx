@@ -420,7 +420,7 @@ export const AIVideoAnalysis = () => {
     return <Loader message="Loading AI video validation & assessment center..." className="py-24" />;
   }
 
-  const isInvalid = inspectAssessment?.validation_status === 'REJECTED' || inspectAssessment?.validation_status === 'INSUFFICIENT_EVIDENCE' || inspectAssessment?.status === 'REJECTED';
+  const isInvalid = !inspectAssessment?.backend_report && (inspectAssessment?.validation_status === 'REJECTED' || inspectAssessment?.validation_status === 'INSUFFICIENT_EVIDENCE' || inspectAssessment?.status === 'REJECTED');
 
   return (
     <div className="space-y-6">

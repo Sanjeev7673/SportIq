@@ -105,8 +105,8 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/player/dashboard" element={<PlayerDashboard />} />
             <Route path="/player/video-analysis" element={<AIVideoAnalysis />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/login" element={<Navigate to="/player/dashboard?showcase=1" replace />} />
+            <Route path="/register" element={<Navigate to="/player/dashboard?showcase=1" replace />} />
 
             {/* Public presentation dashboard: no login required. */}
             <Route path="/player/dashboard" element={<PlayerDashboard />} />

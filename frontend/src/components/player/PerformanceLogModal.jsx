@@ -65,7 +65,7 @@ export const PerformanceLogModal = ({
     setFormData((prev) => ({
       ...prev,
       [field]: ['speed', 'stamina', 'strength', 'agility', 'accuracy', 'matches_played'].includes(field)
-        ? Number(val)
+        ? (val === '' ? '' : Number(val))
         : val
     }));
   };

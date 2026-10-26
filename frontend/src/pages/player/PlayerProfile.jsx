@@ -200,7 +200,7 @@ export const PlayerProfile = () => {
     return <Loader message="Loading athletic profile..." className="py-24" />;
   }
 
-  const positions = SPORT_POSITIONS[formData.sport] || ['Standard Position'];
+  const positions = SPORT_POSITIONS[formData.sport] || [];
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -334,7 +334,7 @@ export const PlayerProfile = () => {
               min="10"
               max="60"
               value={formData.age}
-              onChange={(e) => setFormData({ ...formData, age: Number(e.target.value) })}
+              onChange={(e) => setFormData({ ...formData, age: e.target.value === '' ? '' : Number(e.target.value) })}
               required
             />
 
@@ -351,7 +351,7 @@ export const PlayerProfile = () => {
               min="50"
               max="250"
               value={formData.height}
-              onChange={(e) => setFormData({ ...formData, height: Number(e.target.value) })}
+              onChange={(e) => setFormData({ ...formData, height: e.target.value === '' ? '' : Number(e.target.value) })}
             />
 
             <Input
@@ -360,7 +360,7 @@ export const PlayerProfile = () => {
               min="20"
               max="250"
               value={formData.weight}
-              onChange={(e) => setFormData({ ...formData, weight: Number(e.target.value) })}
+              onChange={(e) => setFormData({ ...formData, weight: e.target.value === '' ? '' : Number(e.target.value) })}
             />
 
             <Input
@@ -369,7 +369,7 @@ export const PlayerProfile = () => {
               min="0"
               max="40"
               value={formData.experience}
-              onChange={(e) => setFormData({ ...formData, experience: Number(e.target.value) })}
+              onChange={(e) => setFormData({ ...formData, experience: e.target.value === '' ? '' : Number(e.target.value) })}
             />
           </div>
 

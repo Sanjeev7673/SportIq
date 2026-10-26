@@ -821,6 +821,25 @@ export const AIVideoAnalysis = () => {
               </div>
             )}
 
+            {inspectAssessment?.backend_report && (() => {
+              const review = inspectAssessment?.analysis_result?.ai_coach_review;
+              const steps = inspectAssessment?.report_status;
+              return (
+                <div className="rounded-xl border border-[#8B5CF6]/25 bg-[#8B5CF6]/5 p-4 space-y-2" data-testid="ai-review">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#A78BFA]">AI Coach Review</h4>
+                  {steps && <p className="text-[11px] text-[#94A3B8]">Pose analysis: {String(steps.pose_analysis || 'unknown').replaceAll('_', ' ')} · AI review: {String(steps.ai_review || 'unknown').replaceAll('_', ' ')} · Overall: {String(steps.overall || 'unknown').replaceAll('_', ' ')}</p>}
+                  {review?.status === 'complete' ? (
+                    <>
+                      <p className="text-sm text-[#F8FAFC]">{review.summary}</p>
+                      {review.observations?.length > 0 && <div><p className="text-[11px] font-bold text-[#94A3B8] uppercase">Observations</p><ul className="list-disc pl-5 text-xs text-[#F8FAFC] space-y-1">{review.observations.map((o, i) => <li key={i}>{o}</li>)}</ul></div>}
+                      {review.recommendations?.length > 0 && <div><p className="text-[11px] font-bold text-[#94A3B8] uppercase">Coaching cues</p><ul className="list-disc pl-5 text-xs text-[#F8FAFC] space-y-1">{review.recommendations.map((o, i) => <li key={i}>{o}</li>)}</ul></div>}
+                      {review.confidence_note && <p className="text-[11px] text-amber-300">{review.confidence_note}</p>}
+                    </>
+                  ) : <p className="text-xs text-amber-300">{review?.status === 'not_configured' ? 'AI review is not configured on the server.' : review?.status ? 'AI review did not complete for this report.' : 'No AI review is stored for this report.'}{review?.summary ? ` ${review.summary}` : ''}</p>}
+                </div>
+              );
+            })()}
+
             {/* Sub-Scores */}
             {inspectAssessment?.analysis_result && (
               <div className="grid grid-cols-3 gap-3 text-center">

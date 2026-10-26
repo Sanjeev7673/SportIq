@@ -411,11 +411,31 @@ async def upload_performance_video(sport: str = Form(...), discipline: str = For
     # claim validated sports timing, jump distance, or competition-grade biomechanics.
     from app.sport_analysis import analyze_video
     analysis = analyze_video(target, sport.strip(), discipline.strip())
+    # Add an actual multimodal vision-model review of sampled frames when configured.
+    from app.gemini_video_review import analyze_keyframes_with_gemini
+    ai_review = analyze_keyframes_with_gemini(target, sport.strip(), discipline.strip())
+    analysis["ai_coach_review"] = ai_review
     strengths = analysis["summary"]
-    if analysis["status"] == "pose_metrics_available":
+    if ai_review.get("status") == "complete":
+        strengths = ai_review["summary"]
+        if analysis["status"] == "pose_metrics_available":
+            strengths += " Separate experimental 2D pose measurements are also available below."
+    elif analysis["status"] == "pose_metrics_available":
         strengths += " The available measurements are experimental and should be reviewed by a qualified coach."
-    improvements = "Limitations: " + " ".join(analysis.get("limitations", []))
-    report = PerformanceReport(athlete_id=user.id, sport=sport.strip(), discipline=discipline.strip(), video_filename=filename, notes=notes.strip(), strengths=strengths, improvements=improvements, analysis_status=analysis["status"], analysis_metrics=json.dumps(analysis.get("metrics", {})))
+    improvements_parts = ["Limitations: " + " ".join(analysis.get("limitations", []))]
+    if ai_review.get("status") == "complete":
+        if ai_review.get("recommendations"):
+            improvements_parts.append("AI coaching cues: " + " ".join(ai_review["recommendations"]))
+        if ai_review.get("limitations"):
+            improvements_parts.append("AI review limitations: " + " ".join(ai_review["limitations"]))
+    elif ai_review.get("status") == "not_configured":
+        improvements_parts.append(ai_review["summary"])
+    elif ai_review.get("status") == "failed":
+        improvements_parts.append(ai_review["summary"])
+    improvements = " ".join(improvements_parts)
+    metrics = dict(analysis.get("metrics", {}))
+    metrics["ai_coach_review"] = ai_review
+    report = PerformanceReport(athlete_id=user.id, sport=sport.strip(), discipline=discipline.strip(), video_filename=filename, notes=notes.strip(), strengths=strengths, improvements=improvements, analysis_status=analysis["status"], analysis_metrics=json.dumps(metrics))
     db.add(report); db.commit(); db.refresh(report)
     return {"success": True, "report_id": report.id, "analysis_status": report.analysis_status, "analysis": analysis, "uploaded_bytes": size, "message": "Video saved. Experimental pose metrics are not a validated athletic performance score."}
 

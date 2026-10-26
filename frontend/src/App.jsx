@@ -101,15 +101,12 @@ function App() {
         <BrowserRouter>
           <Suspense fallback={<div role="status" className="min-h-[50vh] flex items-center justify-center text-sm text-slate-500">Loading SportIQ…</div>}>
           <Routes>
-            {/* Public Landing & Authentication */}
+            {/* Public presentation routes: no login required. */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/player/dashboard" element={<PlayerDashboard />} />
             <Route path="/player/video-analysis" element={<AIVideoAnalysis />} />
             <Route path="/login" element={<Navigate to="/player/dashboard?showcase=1" replace />} />
             <Route path="/register" element={<Navigate to="/player/dashboard?showcase=1" replace />} />
-
-            {/* Public presentation dashboard: no login required. */}
-            <Route path="/player/dashboard" element={<PlayerDashboard />} />
 
             {/* Dashboard Shell */}
             <Route element={<DashboardLayout />}>
@@ -123,7 +120,6 @@ function App() {
                 <Route path="/player/profile" element={<PlayerProfile />} />
                 <Route path="/player/performance" element={<PlayerPerformance />} />
                 <Route path="/player/ai-analysis" element={<AIAnalysisPage />} />
-                <Route path="/player/video-analysis" element={<AIVideoAnalysis />} />
               </Route>
 
               {/* Coach Protected Routes */}

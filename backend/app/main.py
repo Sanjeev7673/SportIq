@@ -19,6 +19,7 @@ from typing import Literal
 import qrcode
 from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
 from io import BytesIO
 from reportlab.lib import colors
@@ -49,7 +50,9 @@ pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 JWT_SECRET = os.getenv("JWT_SECRET_KEY", "")
 if not JWT_SECRET:
     # Suitable only for local development; configure a stable secret in production.
+    # A random secret changes on every restart and logs every user out.
     JWT_SECRET = secrets.token_urlsafe(48)
+    print("WARNING: JWT_SECRET_KEY is not set; using a temporary secret. Set it in the backend environment.", flush=True)
 JWT_ALGORITHM = "HS256"
 TOKEN_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "720"))
 
@@ -391,8 +394,10 @@ def get_profile(user: User = Depends(get_current_user), db: Session = Depends(ge
 async def upload_performance_video(sport: str = Form(...), discipline: str = Form(default=""), notes: str = Form(default=""), video: UploadFile = File(...), user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     if user.role != "athlete": raise HTTPException(status_code=403, detail="Athlete accounts only")
     allowed = {"video/mp4", "video/quicktime", "video/webm", "video/x-matroska"}
-    if video.content_type not in allowed: raise HTTPException(status_code=415, detail="Upload an MP4, MOV, WebM or MKV video")
     ext = Path(video.filename or "upload.mp4").suffix.lower()
+    # Some browsers send application/octet-stream for .mov/.mkv; accept those only with a valid extension.
+    if video.content_type not in allowed and not (ext in {".mp4", ".mov", ".webm", ".mkv"} and video.content_type in (None, "", "application/octet-stream")):
+        raise HTTPException(status_code=415, detail="Upload an MP4, MOV, WebM or MKV video")
     if ext not in {".mp4", ".mov", ".webm", ".mkv"}: ext = ".mp4"
     filename = f"athlete_{user.id}_{secrets.token_hex(12)}{ext}"
     target = UPLOAD_DIR / filename
@@ -410,10 +415,14 @@ async def upload_performance_video(sport: str = Form(...), discipline: str = For
     # Run experimental 2D pose estimation when CV dependencies are available. This does not
     # claim validated sports timing, jump distance, or competition-grade biomechanics.
     from app.sport_analysis import analyze_video
-    analysis = analyze_video(target, sport.strip(), discipline.strip())
+    # OpenCV/MediaPipe are blocking; run them off the event loop so /health and other requests stay responsive.
+    analysis = await run_in_threadpool(analyze_video, target, sport.strip(), discipline.strip())
+    if analysis["status"] in ("video_read_failed", "analysis_failed"):
+        target.unlink(missing_ok=True)
+        raise HTTPException(status_code=422, detail="The server could not read this video. Re-export it as H.264 MP4 and try again." if analysis["status"] == "video_read_failed" else analysis["summary"])
     # Add an actual multimodal vision-model review of sampled frames when configured.
     from app.gemini_video_review import analyze_keyframes_with_gemini
-    ai_review = analyze_keyframes_with_gemini(target, sport.strip(), discipline.strip())
+    ai_review = await run_in_threadpool(analyze_keyframes_with_gemini, target, sport.strip(), discipline.strip())
     analysis["ai_coach_review"] = ai_review
     strengths = analysis["summary"]
     if ai_review.get("status") == "complete":

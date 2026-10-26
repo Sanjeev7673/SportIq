@@ -537,13 +537,15 @@ export const AIVideoAnalysis = () => {
             </label>
 
             {videoPreviewUrl && (
-              <div className="rounded-xl overflow-hidden max-h-48 border border-[#1E293B] bg-black">
-                <video src={videoPreviewUrl} controls className="w-full max-h-48 object-contain" />
-              </div>
-              <div className="flex items-center justify-between gap-3 text-xs text-[#94A3B8]">
-                <span className="truncate">{videoFile?.name} · {videoFile ? (videoFile.size / 1024 / 1024).toFixed(2) : '0'} MB</span>
-                <button type="button" onClick={clearSelectedVideo} className="text-[#EF4444] hover:underline">Remove video</button>
-              </div>
+              <>
+                <div className="rounded-xl overflow-hidden max-h-48 border border-[#1E293B] bg-black">
+                  <video src={videoPreviewUrl} controls className="w-full max-h-48 object-contain" />
+                </div>
+                <div className="flex items-center justify-between gap-3 text-xs text-[#94A3B8]">
+                  <span className="truncate">{videoFile?.name} · {videoFile ? (videoFile.size / 1024 / 1024).toFixed(2) : '0'} MB</span>
+                  <button type="button" onClick={clearSelectedVideo} className="text-[#EF4444] hover:underline">Remove video</button>
+                </div>
+              </>
             )}
           </div>
 

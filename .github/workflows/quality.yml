@@ -48,6 +48,37 @@ jobs:
       - name: Compile backend modules
         run: python -m compileall -q backend
 
+  backend-tests:
+    name: Backend tests (mocked Gemini, no secrets)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - name: Install backend dependencies and test tools
+        run: pip install -r requirements.txt pytest httpx
+      - name: Run backend tests
+        run: python -m pytest -q tests
+
+  config-checks:
+    name: Frontend API configuration checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: No stale hosting URLs or committed secrets in frontend config
+        run: |
+          if grep -rIn "onrender.com" frontend/.env.example frontend/src; then echo "Stale Render URL found"; exit 1; fi
+          if grep -rIEn "AIza[0-9A-Za-z_-]{30,}" frontend/src backend/app; then echo "Possible API key committed"; exit 1; fi
+          grep -q "VITE_API_URL=.*\/api\/v1" frontend/.env.example
   backend-health:
     name: Live backend health smoke test
     # Runs only when a repository variable BACKEND_URL (e.g. https://host, no trailing slash) is set.

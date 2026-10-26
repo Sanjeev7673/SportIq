@@ -84,7 +84,7 @@ export const PlayerPerformance = () => {
     setSubmitting(true);
     if (import.meta.env.VITE_DEMO_MODE === 'true') {
       const saved = JSON.parse(localStorage.getItem('sportiq_demo_performance') || '[]');
-      const record = { ...data, id: `local-${Date.now()}`, assessment_date: data.assessment_date || new Date().toISOString(), source_type: 'USER_ENTERED', local_only: true };
+      const record = { ...data, id: `local-${Date.now()}`, assessment_date: data.assessment_date || new Date().toISOString(), source_type: data.source_type || 'SELF_REPORTED_MANUAL', local_only: true };
       localStorage.setItem('sportiq_demo_performance', JSON.stringify([record, ...saved]));
       setRecords([record, ...saved]);
       setIsModalOpen(false);

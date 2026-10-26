@@ -40,6 +40,7 @@ import {
 } from '../../utils/formatters';
 
 export const AIVideoAnalysis = () => {
+  const showcaseMode = new URLSearchParams(window.location.search).get('showcase') === '1';
   const [profile, setProfile] = useState(null);
   const [assessments, setAssessments] = useState([]);
   const [catalog, setCatalog] = useState([]);
@@ -67,7 +68,7 @@ export const AIVideoAnalysis = () => {
   const [deleteError, setDeleteError] = useState('');
 
   const loadData = async () => {
-    if (import.meta.env.VITE_DEMO_MODE === 'true') {
+    if (showcaseMode || import.meta.env.VITE_DEMO_MODE === 'true') {
       let savedReviews = [];
       try { savedReviews = JSON.parse(localStorage.getItem('sportiq_local_video_reviews') || '[]'); } catch { localStorage.removeItem('sportiq_local_video_reviews'); }
       setProfile(JSON.parse(localStorage.getItem('sportiq_demo_profile') || 'null'));
@@ -149,7 +150,7 @@ export const AIVideoAnalysis = () => {
     }
 
     setUploadError('');
-    if (import.meta.env.VITE_DEMO_MODE === 'true') {
+    if (showcaseMode || import.meta.env.VITE_DEMO_MODE === 'true') {
       const review = {
         id: `local-review-${Date.now()}`,
         sport: selectedSport,

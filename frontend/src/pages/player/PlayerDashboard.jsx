@@ -68,7 +68,25 @@ export const PlayerDashboard = () => {
   useEffect(() => {
     if (import.meta.env.VITE_DEMO_MODE === 'true') {
       // Keep demo preview independent of the unavailable backend.
-      setProfile(JSON.parse(localStorage.getItem('sportiq_demo_profile') || 'null'));
+      let savedProfile = null;
+      try {
+        savedProfile = JSON.parse(localStorage.getItem('sportiq_demo_profile') || 'null');
+      } catch {
+        localStorage.removeItem('sportiq_demo_profile');
+      }
+      const isLegacyPlaceholder = savedProfile &&
+        savedProfile.sport === 'Athletics' &&
+        /sprinter/i.test(savedProfile.position || '') &&
+        Number(savedProfile.age) === 20 &&
+        Number(savedProfile.height) === 185 &&
+        Number(savedProfile.weight) === 70 &&
+        Number(savedProfile.experience) === 5 &&
+        /state level runner/i.test(savedProfile.achievements || '');
+      if (isLegacyPlaceholder) {
+        savedProfile = null;
+        localStorage.removeItem('sportiq_demo_profile');
+      }
+      setProfile(savedProfile);
       setStats(null);
       setHistory([]);
       setLatestAI(null);

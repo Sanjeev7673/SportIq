@@ -490,7 +490,7 @@ export const AIVideoAnalysis = () => {
         isOpen={isUploadModalOpen}
         onClose={() => setIsUploadModalOpen(false)}
         title="Daily Video Assessment Upload"
-        subtitle="Choose a video, preview it, and save a local review record. No server upload or AI model is used in presentation mode."
+        subtitle="Upload a video to the SportIQ API for experimental pose measurements. Results are not a validated performance score."
         maxWidth="max-w-2xl"
       >
         <form onSubmit={handleUploadSubmit} className="space-y-4">
@@ -739,13 +739,19 @@ export const AIVideoAnalysis = () => {
             {/* Video Player & Score Summary */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="md:col-span-2 rounded-2xl overflow-hidden bg-black border border-[#1E293B] max-h-72">
-                {inspectAssessment?.video_url && (
+                {inspectAssessment?.video_url ? (
                   <video
                     src={getImageUrl(inspectAssessment.video_url)}
                     controls
                     autoPlay
                     className="w-full h-72 object-contain"
                   />
+                ) : (
+                  <div className="h-72 flex flex-col items-center justify-center gap-2 px-5 text-center text-xs text-[#94A3B8]">
+                    <Video className="w-8 h-8 text-[#64748B]" />
+                    <span>Video playback is not exposed by the current report API.</span>
+                    <span className="text-[10px]">{inspectAssessment?.original_filename || 'Video report'}</span>
+                  </div>
                 )}
               </div>
 
@@ -800,6 +806,17 @@ export const AIVideoAnalysis = () => {
                 )}
               </div>
             </div>
+
+            {inspectAssessment?.analysis_result?.summary && (
+              <div className="rounded-xl border border-[#06B6D4]/25 bg-[#06B6D4]/5 p-4 space-y-2">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[#06B6D4]">Analysis Summary</h4>
+                <p className="text-sm text-[#F8FAFC]">{inspectAssessment.analysis_result.summary}</p>
+                {inspectAssessment.analysis_result.limitations && (
+                  <p className="text-xs text-[#94A3B8]">{inspectAssessment.analysis_result.limitations}</p>
+                )}
+                <p className="text-[11px] text-amber-300">Experimental pose measurements only. No validated athletic performance score is generated.</p>
+              </div>
+            )}
 
             {/* Sub-Scores */}
             {inspectAssessment?.analysis_result && (

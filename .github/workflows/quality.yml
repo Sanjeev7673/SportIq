@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches: [main, review-ready-demo]
+    branches: [main, review-ready-demo, fix/video-upload-pipeline]
   workflow_dispatch:
 
 permissions:

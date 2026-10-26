@@ -12,10 +12,11 @@ import Loader from '../../components/common/Loader';
 import ThemeSelector from '../../components/common/ThemeSelector';
 
 export const PlayerProfile = () => {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const fileInputRef = useRef(null);
 
   const [profile, setProfile] = useState(null);
+  const [identityData, setIdentityData] = useState({ name: user?.name || '', email: user?.email || '' });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
@@ -158,8 +159,14 @@ export const PlayerProfile = () => {
     setError('');
 
     if (import.meta.env.VITE_DEMO_MODE === 'true') {
+      if (!identityData.name.trim() || !identityData.email.trim()) {
+        setError('Enter your full name and email address before saving.');
+        setSaving(false);
+        return;
+      }
       const saved = { ...formData, id: profile?.id || 'local-demo-profile', profile_image: formData.profile_image || '' };
       localStorage.setItem('sportiq_demo_profile', JSON.stringify(saved));
+      updateUser({ name: identityData.name.trim(), email: identityData.email.trim().toLowerCase() });
       setProfile(saved);
       setMessage('Profile saved successfully on this device.');
       setSaving(false);
@@ -294,6 +301,14 @@ export const PlayerProfile = () => {
               </div>
             </div>
           </div>
+
+          {/* Signed-in identity is editable for the local presentation profile. */}
+          {import.meta.env.VITE_DEMO_MODE === 'true' && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Input label="Full name" type="text" value={identityData.name} onChange={(e) => setIdentityData((prev) => ({ ...prev, name: e.target.value }))} required />
+              <Input label="Email address" type="email" value={identityData.email} onChange={(e) => setIdentityData((prev) => ({ ...prev, email: e.target.value }))} required />
+            </div>
+          )}
 
           {/* Form Fields Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

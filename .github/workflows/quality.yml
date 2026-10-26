@@ -50,6 +50,8 @@ jobs:
 
   backend-health:
     name: Live backend health smoke test
+    # Runs only when a repository variable BACKEND_URL (e.g. https://host, no trailing slash) is set.
+    if: ${{ vars.BACKEND_URL != '' }}
     runs-on: ubuntu-latest
     steps:
       - name: Wake and verify the deployed API
@@ -57,4 +59,4 @@ jobs:
           curl --fail --silent --show-error \
             --retry 5 --retry-all-errors --retry-delay 10 \
             --connect-timeout 10 --max-time 35 \
-            https://sportiq-2.onrender.com/health
+            "${{ vars.BACKEND_URL }}/health"

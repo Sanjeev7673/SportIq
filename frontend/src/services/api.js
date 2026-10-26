@@ -1,48 +1,36 @@
 import axios from 'axios';
 
 const LOCAL_API = 'http://127.0.0.1:8000/api/v1';
-const PRODUCTION_API = 'https://sportiq-2.onrender.com/api/v1';
+const configuredApi = (import.meta.env.VITE_API_URL || '').trim().replace(/\/$/, '');
 
-const getApiBaseUrl = () => {
-  const configured = import.meta.env.VITE_API_URL?.trim();
-  if (configured) return configured.replace(/\/$/, '');
-
-  if (typeof window !== 'undefined') {
-    const host = window.location.hostname;
-    if (
-      host === 'localhost' ||
-      host === '127.0.0.1' ||
-      host.startsWith('192.168.') ||
-      host.startsWith('10.')
-    ) return LOCAL_API;
-  }
-  return PRODUCTION_API;
+const isLocalHost = () => {
+  if (typeof window === 'undefined') return true;
+  const host = window.location.hostname;
+  return host === 'localhost' || host === '127.0.0.1' ||
+    host.startsWith('192.168.') || host.startsWith('10.');
 };
+
+// Never silently route production traffic to an old provider or a fake API.
+// Configure VITE_API_URL to the actual deployed API URL when the backend is deployed.
+const getApiBaseUrl = () => configuredApi || (isLocalHost() ? LOCAL_API : '');
 
 const api = axios.create({
   baseURL: getApiBaseUrl(),
   headers: { 'Content-Type': 'application/json' },
-  timeout: 20000,
+  timeout: 120000,
 });
 
 api.interceptors.request.use(
   (config) => {
-    if (typeof window !== 'undefined') {
-      const host = window.location.hostname;
-      const isLocal = host === 'localhost' || host === '127.0.0.1' ||
-        host.startsWith('192.168.') || host.startsWith('10.');
-
-      // Never allow a deployed frontend to accidentally call localhost.
-      if (!isLocal && (!config.baseURL || /localhost|127\.0\.0\.1/.test(config.baseURL))) {
-        config.baseURL = PRODUCTION_API;
-      }
+    if (!config.baseURL) {
+      return Promise.reject(new Error(
+        'SportIQ backend is not configured yet. The frontend is online, but the API deployment URL has not been connected.'
+      ));
     }
-
-    const token = localStorage.getItem('sportiq_token');
+    const token = typeof localStorage !== 'undefined' ? localStorage.getItem('sportiq_token') : null;
     config.headers = config.headers || {};
     if (token) config.headers.Authorization = `Bearer ${token}`;
     else delete config.headers.Authorization;
-
     return config;
   },
   (error) => Promise.reject(error)
@@ -55,22 +43,14 @@ api.interceptors.response.use(
     if (status === 401) {
       localStorage.removeItem('sportiq_token');
       localStorage.removeItem('sportiq_user');
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new Event('sportiq:unauthorized'));
-      }
+      if (typeof window !== 'undefined') window.dispatchEvent(new Event('sportiq:unauthorized'));
     }
-
-    const serverMessage =
-      error.response?.data?.message ||
-      error.response?.data?.detail ||
-      error.response?.data?.error;
-    const message = serverMessage ||
-      (error.code === 'ECONNABORTED'
-        ? 'The server is taking too long to respond. It may be waking up. Please wait a moment and try again.'
-        : !error.response
-          ? 'Cannot connect to SportIQ services. The backend may be waking up; please retry shortly.'
-          : error.message || 'Request failed. Please try again.');
-
+    const serverMessage = error.response?.data?.message || error.response?.data?.detail || error.response?.data?.error;
+    const message = serverMessage || (error.code === 'ECONNABORTED'
+      ? 'The request timed out. Try a shorter video or retry.'
+      : !error.response
+        ? error.message || 'Cannot connect to SportIQ services. Check the backend deployment and API URL.'
+        : error.message || 'Request failed. Please try again.');
     const normalizedError = new Error(typeof message === 'string' ? message : 'Request failed. Please try again.');
     normalizedError.status = status;
     normalizedError.code = error.code;
@@ -78,10 +58,11 @@ api.interceptors.response.use(
   }
 );
 
-// The health endpoint is mounted at /health, outside the /api/v1 router.
 export const wakeBackend = () => {
-  const baseUrl = (api.defaults.baseURL || PRODUCTION_API).replace(/\/api\/v1\/?$/, '');
-  return fetch(`${baseUrl}/health`, { method: 'GET' }).catch(() => undefined);
+  const baseUrl = api.defaults.baseURL;
+  if (!baseUrl) return Promise.resolve();
+  const healthUrl = baseUrl.replace(/\/api\/v1\/?$/, '');
+  return fetch(`${healthUrl}/health`, { method: 'GET' }).catch(() => undefined);
 };
 
 export default api;

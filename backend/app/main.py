@@ -419,7 +419,7 @@ def list_reports(user: User = Depends(get_current_user), db: Session = Depends(g
     return {"success": True, "reports": [report_json(r) for r in reports]}
 
 def report_json(r: PerformanceReport):
-    return {"id": r.id, "sport": r.sport, "discipline": r.discipline, "notes": r.notes, "strengths": r.strengths, "improvements": r.improvements, "analysis_status": r.analysis_status, "analysis_metrics": json.loads(r.analysis_metrics or "{}"), "created_at": r.created_at.isoformat(), "qr_url": f"/api/v1/reports/{r.id}/qr"}
+    return {"id": r.id, "sport": r.sport, "discipline": r.discipline, "video_filename": r.video_filename, "notes": r.notes, "strengths": r.strengths, "improvements": r.improvements, "analysis_status": r.analysis_status, "analysis_metrics": json.loads(r.analysis_metrics or "{}"), "created_at": r.created_at.isoformat(), "qr_url": f"/api/v1/reports/{r.id}/qr"}
 
 def owned_report(report_id: int, user: User, db: Session):
     r = db.get(PerformanceReport, report_id)

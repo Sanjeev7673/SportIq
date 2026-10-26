@@ -62,8 +62,7 @@ def analyze_keyframes_with_gemini(path: str | Path, sport: str, discipline: str)
         from PIL import Image
         from google import genai
     except Exception as exc:
-        error_code, hint = _classify_error(exc)
-        print(f"Gemini review failed: {type(exc).__name__} ({error_code})", flush=True)
+        print(f"Gemini dependencies unavailable: {type(exc).__name__}", flush=True)
         return {
             "status": "model_unavailable",
             "summary": "Gemini review could not start because a required server dependency is unavailable.",
@@ -155,6 +154,8 @@ Do not invent measurements, timing, speed, strength, scores, identity, injury ri
             "confidence_note": "Qualitative AI review of sampled still frames; not a validated biomechanics assessment.",
         }
     except Exception as exc:
+        error_code, hint = _classify_error(exc)
+        print(f"Gemini review failed: {type(exc).__name__} ({error_code})", flush=True)
         return {
             "status": "failed",
             "error_code": error_code,

@@ -57,6 +57,7 @@ JWT_ALGORITHM = "HS256"
 TOKEN_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "720"))
 
 # Bound expensive video analysis to avoid exhausting CPU/memory under concurrent uploads.
+MAX_VIDEO_MB = max(1, int(os.getenv("MAX_VIDEO_MB", "100")))
 ANALYSIS_SLOTS = asyncio.Semaphore(max(1, int(os.getenv("ANALYSIS_CONCURRENCY", "2"))))
 
 def overall_report_status(pose_status: str, ai_status: str) -> str:
@@ -424,12 +425,15 @@ async def upload_performance_video(sport: str = Form(...), discipline: str = For
         with target.open("wb") as out:
             while chunk := await video.read(1024 * 1024):
                 size += len(chunk)
-                if size > 250 * 1024 * 1024: raise HTTPException(status_code=413, detail="Video exceeds 250 MB limit")
+                if size > MAX_VIDEO_MB * 1024 * 1024: raise HTTPException(status_code=413, detail=f"Video exceeds the {MAX_VIDEO_MB} MB limit")
                 out.write(chunk)
     except Exception:
         target.unlink(missing_ok=True); raise
     finally:
         await video.close()
+    if size == 0:
+        target.unlink(missing_ok=True)
+        raise HTTPException(status_code=400, detail="The uploaded video file is empty.")
     try:
         async with ANALYSIS_SLOTS:
             # Experimental 2D pose estimation; not a validated sports performance score.

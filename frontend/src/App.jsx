@@ -112,9 +112,11 @@ function App() {
               <Route path="/events" element={<EventHubPage />} />
               <Route path="/events/:id" element={<EventDetailPage />} />
 
+              {/* Dashboard preview is directly accessible from the landing page. */}
+              <Route path="/player/dashboard" element={<PlayerDashboard />} />
+
               {/* Player Protected Routes */}
               <Route element={<ProtectedRoute allowedRoles={[USER_ROLES.PLAYER, USER_ROLES.ADMIN]} />}>
-                <Route path="/player/dashboard" element={<PlayerDashboard />} />
                 <Route path="/player/tasks" element={<Navigate to="/player/dashboard" replace />} />
                 <Route path="/player/profile" element={<PlayerProfile />} />
                 <Route path="/player/performance" element={<PlayerPerformance />} />

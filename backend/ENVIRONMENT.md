@@ -11,6 +11,7 @@ Set these where the backend runs. Never commit real secrets.
 | `DATABASE_URL` | Optional | Defaults to SQLite under `SPORTIQ_DATA_DIR`; use persistent storage for production. |
 | `SPORTIQ_DATA_DIR` | Optional | Stores uploads, QR images and the SQLite database. Ephemeral container disks lose these on restart. |
 | `BACKEND_CORS_ORIGINS` | Optional | Comma-separated frontend origins. |
+| `MAX_VIDEO_MB` | Optional | Max upload size in MB (default `100`; keep in sync with `MAX_VIDEO_MB` in `frontend/src/utils/constants.js`). |
 | `ANALYSIS_CONCURRENCY` | Optional | Intended maximum concurrent video analyses; defaults to 2. |
 
 Vercel frontend variable: `VITE_API_URL=https://<real-backend-host>/api/v1`.

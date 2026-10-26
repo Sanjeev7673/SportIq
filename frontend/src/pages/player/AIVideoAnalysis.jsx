@@ -371,6 +371,10 @@ export const AIVideoAnalysis = () => {
               <span className="flex items-center gap-1 text-[11px] font-bold text-[#22C55E] bg-[#22C55E]/10 border border-[#22C55E]/20 px-2 py-1 rounded-lg">
                 <Lock className="w-3 h-3" /> Verified
               </span>
+            ) : r.backend_report ? (
+              <span className="text-[10px] text-[#94A3B8]" title="The current backend does not provide report deletion">
+                Retained
+              </span>
             ) : (
               <Button
                 onClick={() => setDeleteTargetAssessment(r)}

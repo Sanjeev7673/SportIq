@@ -103,6 +103,8 @@ function App() {
           <Routes>
             {/* Public Landing & Authentication */}
             <Route path="/" element={<LandingPage />} />
+            <Route path="/player/dashboard" element={<PlayerDashboard />} />
+            <Route path="/player/video-analysis" element={<AIVideoAnalysis />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
 

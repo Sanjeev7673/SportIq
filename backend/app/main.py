@@ -1,8 +1,7 @@
-"""SportIQ API MVP: athlete profiles, reports, coaches, sponsors, events and bookings.
+"""SportIQ API for athlete profiles, reports, coaches, sponsors, events and bookings.
 
-AI video analysis is intentionally represented as a clearly labelled baseline report until
-a validated pose-estimation/model pipeline is connected. Do not present baseline metrics
-as scientifically measured athletic performance.
+Video analysis combines experimental 2D pose measurements with an optional Gemini review
+of sampled still frames. Neither is a validated competition-grade performance score.
 """
 from __future__ import annotations
 

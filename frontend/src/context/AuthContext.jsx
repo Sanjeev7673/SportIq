@@ -79,7 +79,7 @@ export const AuthProvider = ({ children }) => {
         access_token: 'sportiq-demo-session',
         user: {
           id: 'demo-player',
-          name: enteredName || previousUser?.name || inferredName || 'Player',
+          name: enteredName || (previousUser?.email === normalizedEmail && previousUser?.name && previousUser.name !== 'Demo Player' ? previousUser.name : '') || inferredName || 'Player',
           email: normalizedEmail,
           role: 'PLAYER',
         },

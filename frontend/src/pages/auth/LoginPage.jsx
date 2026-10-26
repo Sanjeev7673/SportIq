@@ -18,6 +18,7 @@ export const LoginPage = () => {
   const navigate = useNavigate();
 
   const [identifier, setIdentifier] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -32,7 +33,7 @@ export const LoginPage = () => {
     setLoading(true);
 
     try {
-      const res = await login(identifier.trim(), password);
+      const res = await login(identifier.trim(), password, displayName);
       const role = res.user?.role;
       // Redirect to respective dashboard
       if (role === 'PLAYER') navigate('/player/dashboard');
@@ -86,6 +87,16 @@ export const LoginPage = () => {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {import.meta.env.VITE_DEMO_MODE === 'true' && (
+              <Input
+                label="Your name"
+                type="text"
+                placeholder="Enter your name"
+                icon={User}
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+              />
+            )}
             <Input
               label="Email address"
               type="email"

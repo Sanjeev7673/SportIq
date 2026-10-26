@@ -114,7 +114,7 @@ export const AIVideoAnalysis = () => {
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const validExtension = /\\.(mp4|mov|webm|mkv)$/i.test(file.name);
+    const validExtension = /\.(mp4|mov|webm|mkv)$/i.test(file.name);
     if (!(file.type.startsWith('video/') || validExtension)) {
       setUploadError('Choose a supported video file (MP4, MOV, WEBM, or MKV).');
       e.target.value = '';

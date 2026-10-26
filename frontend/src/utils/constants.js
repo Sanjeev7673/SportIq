@@ -14,6 +14,9 @@ const getApiBaseUrl = () => {
 
 export const API_BASE_URL = getApiBaseUrl();
 
+// Keep client-side validation aligned with backend/app/main.py.
+export const MAX_VIDEO_MB = Math.max(1, Number.parseInt(import.meta.env.VITE_MAX_VIDEO_MB || '100', 10) || 100);
+
 export const USER_ROLES = {
   PLAYER: 'PLAYER',
   COACH: 'COACH',

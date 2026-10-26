@@ -311,8 +311,8 @@ export const PerformanceLogModal = ({
           />
         </div>
 
-        {/* Estimated Data Confidence Preview Card */}
-        <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 flex items-center justify-between">
+        {/* Estimated confidence is not shown in static mode because it is not independently verified. */}
+        {import.meta.env.VITE_DEMO_MODE !== 'true' && <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
             <div>
@@ -329,7 +329,7 @@ export const PerformanceLogModal = ({
           }`}>
             {estConfidence}%
           </span>
-        </div>
+        </div>}
 
         <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
           <Button variant="secondary" size="sm" onClick={onClose} disabled={loading || uploadingEvidence}>

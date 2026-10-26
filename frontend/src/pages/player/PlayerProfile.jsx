@@ -24,32 +24,42 @@ export const PlayerProfile = () => {
   const [previewUrl, setPreviewUrl] = useState(null);
 
   const [formData, setFormData] = useState({
-    sport: 'Football',
-    position: 'Forward',
-    age: 20,
-    gender: 'Male',
-    experience: 3,
-    height: 180,
-    weight: 75,
+    sport: '',
+    position: '',
+    age: '',
+    gender: '',
+    experience: '',
+    height: '',
+    weight: '',
     achievements: '',
     profile_image: '',
   });
 
   useEffect(() => {
     const loadProfile = async () => {
+      if (import.meta.env.VITE_DEMO_MODE === 'true') {
+        const saved = JSON.parse(localStorage.getItem('sportiq_demo_profile') || 'null');
+        if (saved) {
+          setProfile(saved);
+          setFormData((prev) => ({ ...prev, ...saved }));
+          if (saved.profile_image) setPreviewUrl(saved.profile_image);
+        }
+        setLoading(false);
+        return;
+      }
       try {
         setLoading(true);
         const data = await playerService.getMyProfile();
         if (data) {
           setProfile(data);
           setFormData({
-            sport: data.sport || 'Football',
+            sport: data.sport || '',
             position: data.position || '',
-            age: data.age || 20,
-            gender: data.gender || 'Male',
-            experience: data.experience || 0,
-            height: data.height || 180,
-            weight: data.weight || 75,
+            age: data.age ?? '',
+            gender: data.gender || '',
+            experience: data.experience ?? '',
+            height: data.height ?? '',
+            weight: data.weight ?? '',
             achievements: data.achievements || '',
             profile_image: data.profile_image || '',
           });
@@ -66,6 +76,10 @@ export const PlayerProfile = () => {
 
     loadProfile();
   }, []);
+
+  useEffect(() => () => {
+    if (previewUrl?.startsWith('blob:')) URL.revokeObjectURL(previewUrl);
+  }, [previewUrl]);
 
   const handleSportChange = (newSport) => {
     const availablePositions = SPORT_POSITIONS[newSport] || [];
@@ -98,8 +112,8 @@ export const PlayerProfile = () => {
     const objectUrl = URL.createObjectURL(file);
     setPreviewUrl(objectUrl);
 
-    // If profile exists, upload directly
-    if (profile?.id) {
+    // Demo mode must never send profile media to the backend.
+    if (profile?.id && import.meta.env.VITE_DEMO_MODE !== 'true') {
       setUploadingPhoto(true);
       try {
         const res = await playerService.uploadPhoto(file);
@@ -111,6 +125,9 @@ export const PlayerProfile = () => {
       } finally {
         setUploadingPhoto(false);
       }
+    } else if (import.meta.env.VITE_DEMO_MODE === 'true') {
+      setFormData((prev) => ({ ...prev, profile_image: '' }));
+      setMessage('Preview only: the photo is shown temporarily on this page and will not be uploaded or saved.');
     } else {
       setMessage('Profile photo preview loaded. It will be saved when you create your profile.');
     }
@@ -121,6 +138,15 @@ export const PlayerProfile = () => {
     setSaving(true);
     setMessage('');
     setError('');
+
+    if (import.meta.env.VITE_DEMO_MODE === 'true') {
+      const saved = { ...formData, id: profile?.id || 'local-demo-profile', profile_image: formData.profile_image || '' };
+      localStorage.setItem('sportiq_demo_profile', JSON.stringify(saved));
+      setProfile(saved);
+      setMessage('Profile saved on this demo device. It has not been sent to a server.');
+      setSaving(false);
+      return;
+    }
 
     try {
       if (profile) {

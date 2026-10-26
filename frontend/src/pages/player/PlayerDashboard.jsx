@@ -66,20 +66,44 @@ export const PlayerDashboard = () => {
   };
 
   useEffect(() => {
+    if (import.meta.env.VITE_DEMO_MODE === 'true') {
+      // Keep demo preview independent of the unavailable backend.
+      setProfile(JSON.parse(localStorage.getItem('sportiq_demo_profile') || 'null'));
+      setStats(null);
+      setHistory([]);
+      setLatestAI(null);
+      setRecommendations([]);
+      setLoading(false);
+      return;
+    }
     fetchDashboardData();
   }, []);
 
   const handleLogSubmit = async (data) => {
     setSubmittingLog(true);
     try {
+      if (import.meta.env.VITE_DEMO_MODE === 'true') {
+        const saved = JSON.parse(localStorage.getItem('sportiq_demo_performance') || '[]');
+        const record = {
+          ...data,
+          id: `local-${Date.now()}`,
+          assessment_date: new Date().toISOString(),
+          source_type: 'USER_ENTERED',
+          demo_only: true,
+        };
+        localStorage.setItem('sportiq_demo_performance', JSON.stringify([record, ...saved]));
+        setHistory((current) => [record, ...current]);
+        setIsLogModalOpen(false);
+        return;
+      }
+
       const record = await performanceService.addRecord(data);
-      if (profile?.id && record?.id) {
-        // Trigger AI predict and save
+      if (profile?.id && record?.id && profile?.age && profile?.sport) {
         await aiService.predictTalent({
           ...data,
-          age: profile.age || 20,
+          age: profile.age,
           sport: profile.sport,
-          position: profile.position || 'Forward',
+          position: profile.position || undefined,
           player_id: profile.id,
           performance_id: record.id
         });
@@ -99,17 +123,22 @@ export const PlayerDashboard = () => {
 
   if (!profile) {
     return (
-      <div className="text-center py-20">
-        <Card className="max-w-md mx-auto">
-          <Award className="w-12 h-12 text-[#06B6D4] mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-[#F8FAFC] mb-2 font-display">Athletic Profile Required</h3>
-          <p className="text-xs text-[#94A3B8] mb-6">
-            Please complete your athletic profile (sport, position, age, metrics) to unlock AI talent tracking.
-          </p>
-          <Link to="/player/profile">
-            <Button variant="primary" size="md">Create Profile Now</Button>
-          </Link>
-        </Card>
+      <div className="space-y-6 pb-8">
+        <section className="relative overflow-hidden rounded-3xl border border-[var(--border-color)] bg-[var(--bg-card)] p-7 sm:p-10">
+          <div className="absolute -right-12 -top-16 h-56 w-56 rounded-full bg-red-500/10 blur-3xl" />
+          <div className="relative max-w-2xl">
+            <Badge variant="primary" className="mb-4">ATHLETE ONBOARDING</Badge>
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[var(--text-primary)]">Build your performance profile.</h1>
+            <p className="mt-3 max-w-xl text-sm leading-6 text-[var(--text-secondary)]">Your dashboard becomes meaningful when it is based on your own sport, measurements and training sessions. We will not fill it with made-up scores.</p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link to="/player/profile"><Button variant="primary" size="md">Complete athlete profile</Button></Link>
+              <Link to="/player/performance"><Button variant="secondary" size="md">View performance log</Button></Link>
+            </div>
+          </div>
+        </section>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {[{n:'01',title:'Add your details',copy:'Choose your sport, position and basic measurements.'},{n:'02',title:'Record a session',copy:'Enter a performance assessment or training result.'},{n:'03',title:'Unlock insights',copy:'Use your submitted evidence to build meaningful trends.'}].map(step => <Card key={step.n} className="p-5"><span className="text-xs font-mono text-red-500">{step.n} / START HERE</span><h3 className="mt-3 font-bold text-[var(--text-primary)]">{step.title}</h3><p className="mt-2 text-sm leading-5 text-[var(--text-secondary)]">{step.copy}</p></Card>)}
+        </div>
       </div>
     );
   }
@@ -209,11 +238,11 @@ export const PlayerDashboard = () => {
         {/* Radar Chart */}
         <Card title="5-Pillar Athletic Radar" subtitle="Multi-factor performance breakdown" className="lg:col-span-1">
           <TalentRadarChart
-            speed={stats?.avg_speed || 60}
-            stamina={stats?.avg_stamina || 60}
-            strength={stats?.avg_strength || 60}
-            agility={stats?.avg_agility || 60}
-            accuracy={stats?.avg_accuracy || 60}
+            speed={stats?.avg_speed ?? 0}
+            stamina={stats?.avg_stamina ?? 0}
+            strength={stats?.avg_strength ?? 0}
+            agility={stats?.avg_agility ?? 0}
+            accuracy={stats?.avg_accuracy ?? 0}
             height={260}
           />
         </Card>

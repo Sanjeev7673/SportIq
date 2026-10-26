@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -8,61 +8,98 @@ import DashboardLayout from './components/layout/DashboardLayout';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 
 // Public Pages
-import LandingPage from './pages/LandingPage';
-import LoginPage from './pages/auth/LoginPage';
-import RegisterPage from './pages/auth/RegisterPage';
-import NotFoundPage from './pages/NotFoundPage';
+
+
+
+
 
 // Common Event Hub Pages
-import EventHubPage from './pages/events/EventHubPage';
-import EventDetailPage from './pages/events/EventDetailPage';
+
+
 
 // Player Pages
-import PlayerDashboard from './pages/player/PlayerDashboard';
-import PlayerProfile from './pages/player/PlayerProfile';
-import PlayerPerformance from './pages/player/PlayerPerformance';
-import AIAnalysisPage from './pages/player/AIAnalysisPage';
-import AIVideoAnalysis from './pages/player/AIVideoAnalysis';
+
+
+
+
+
 
 // Coach Pages
-import CoachDashboard from './pages/coach/CoachDashboard';
-import PlayerDiscovery from './pages/coach/PlayerDiscovery';
-import PlayerComparison from './pages/coach/PlayerComparison';
-import TrainingRecommendations from './pages/coach/TrainingRecommendations';
+
+
+
+
 
 // Scout Pages
-import ScoutDashboard from './pages/scout/ScoutDashboard';
-import ShortlistedPlayers from './pages/scout/ShortlistedPlayers';
+
+
 
 // Organizer Pages
-import OrganizerDashboard from './pages/organizer/OrganizerDashboard';
-import OrganizerEvents from './pages/organizer/OrganizerEvents';
-import CreateEditEventPage from './pages/organizer/CreateEditEventPage';
-import OrganizerProfile from './pages/organizer/OrganizerProfile';
+
+
+
+
 
 // Admin Pages
-import AdminDashboard from './pages/admin/AdminDashboard';
-import UserManagement from './pages/admin/UserManagement';
-import AthleteManagement from './pages/admin/AthleteManagement';
-import CoachManagement from './pages/admin/CoachManagement';
-import ScoutManagement from './pages/admin/ScoutManagement';
-import OrganizerManagement from './pages/admin/OrganizerManagement';
-import AdminEventsManagement from './pages/admin/AdminEventsManagement';
-import EventVerificationPage from './pages/admin/EventVerificationPage';
-import EventReviewPage from './pages/admin/EventReviewPage';
-import AdminReportsPage from './pages/admin/AdminReportsPage';
-import AdminSettingsPage from './pages/admin/AdminSettingsPage';
-import AdminProfilePage from './pages/admin/AdminProfilePage';
-import SportManagement from './pages/admin/SportManagement';
-import SystemAnalytics from './pages/admin/SystemAnalytics';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 import { USER_ROLES } from './utils/constants';
+
+const LandingPage = React.lazy(() => import('./pages/LandingPage'));
+const LoginPage = React.lazy(() => import('./pages/auth/LoginPage'));
+const RegisterPage = React.lazy(() => import('./pages/auth/RegisterPage'));
+const NotFoundPage = React.lazy(() => import('./pages/NotFoundPage'));
+const EventHubPage = React.lazy(() => import('./pages/events/EventHubPage'));
+const EventDetailPage = React.lazy(() => import('./pages/events/EventDetailPage'));
+const PlayerDashboard = React.lazy(() => import('./pages/player/PlayerDashboard'));
+const PlayerProfile = React.lazy(() => import('./pages/player/PlayerProfile'));
+const PlayerPerformance = React.lazy(() => import('./pages/player/PlayerPerformance'));
+const AIAnalysisPage = React.lazy(() => import('./pages/player/AIAnalysisPage'));
+const AIVideoAnalysis = React.lazy(() => import('./pages/player/AIVideoAnalysis'));
+const CoachDashboard = React.lazy(() => import('./pages/coach/CoachDashboard'));
+const PlayerDiscovery = React.lazy(() => import('./pages/coach/PlayerDiscovery'));
+const PlayerComparison = React.lazy(() => import('./pages/coach/PlayerComparison'));
+const TrainingRecommendations = React.lazy(() => import('./pages/coach/TrainingRecommendations'));
+const ScoutDashboard = React.lazy(() => import('./pages/scout/ScoutDashboard'));
+const ShortlistedPlayers = React.lazy(() => import('./pages/scout/ShortlistedPlayers'));
+const OrganizerDashboard = React.lazy(() => import('./pages/organizer/OrganizerDashboard'));
+const OrganizerEvents = React.lazy(() => import('./pages/organizer/OrganizerEvents'));
+const CreateEditEventPage = React.lazy(() => import('./pages/organizer/CreateEditEventPage'));
+const OrganizerProfile = React.lazy(() => import('./pages/organizer/OrganizerProfile'));
+const AdminDashboard = React.lazy(() => import('./pages/admin/AdminDashboard'));
+const UserManagement = React.lazy(() => import('./pages/admin/UserManagement'));
+const AthleteManagement = React.lazy(() => import('./pages/admin/AthleteManagement'));
+const CoachManagement = React.lazy(() => import('./pages/admin/CoachManagement'));
+const ScoutManagement = React.lazy(() => import('./pages/admin/ScoutManagement'));
+const OrganizerManagement = React.lazy(() => import('./pages/admin/OrganizerManagement'));
+const AdminEventsManagement = React.lazy(() => import('./pages/admin/AdminEventsManagement'));
+const EventVerificationPage = React.lazy(() => import('./pages/admin/EventVerificationPage'));
+const EventReviewPage = React.lazy(() => import('./pages/admin/EventReviewPage'));
+const AdminReportsPage = React.lazy(() => import('./pages/admin/AdminReportsPage'));
+const AdminSettingsPage = React.lazy(() => import('./pages/admin/AdminSettingsPage'));
+const AdminProfilePage = React.lazy(() => import('./pages/admin/AdminProfilePage'));
+const SportManagement = React.lazy(() => import('./pages/admin/SportManagement'));
+const SystemAnalytics = React.lazy(() => import('./pages/admin/SystemAnalytics'));
 
 function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
         <BrowserRouter>
+          <Suspense fallback={<div role="status" className="min-h-[50vh] flex items-center justify-center text-sm text-slate-500">Loading SportIQ…</div>}>
           <Routes>
             {/* Public Landing & Authentication */}
             <Route path="/" element={<LandingPage />} />
@@ -131,6 +168,7 @@ function App() {
             {/* 404 Handler */}
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
+          </Suspense>
         </BrowserRouter>
       </AuthProvider>
     </ThemeProvider>

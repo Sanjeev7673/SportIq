@@ -37,6 +37,15 @@ export const PlayerPerformance = () => {
   const [videoModalUrl, setVideoModalUrl] = useState(null);
 
   const loadData = async () => {
+    if (import.meta.env.VITE_DEMO_MODE === 'true') {
+      const saved = JSON.parse(localStorage.getItem('sportiq_demo_performance') || '[]');
+      setProfile(JSON.parse(localStorage.getItem('sportiq_demo_profile') || 'null'));
+      setRecords(saved);
+      setStats(null);
+      setOfflineCount(0);
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
       const prof = await playerService.getMyProfile();
@@ -73,6 +82,15 @@ export const PlayerPerformance = () => {
 
   const handleAddLog = async (data) => {
     setSubmitting(true);
+    if (import.meta.env.VITE_DEMO_MODE === 'true') {
+      const saved = JSON.parse(localStorage.getItem('sportiq_demo_performance') || '[]');
+      const record = { ...data, id: `local-${Date.now()}`, assessment_date: new Date().toISOString(), source_type: 'USER_ENTERED', demo_only: true };
+      localStorage.setItem('sportiq_demo_performance', JSON.stringify([record, ...saved]));
+      setRecords([record, ...saved]);
+      setIsModalOpen(false);
+      setSubmitting(false);
+      return;
+    }
     try {
       const record = await performanceService.addRecord(data);
       if (profile?.id && record?.id) {
@@ -122,6 +140,13 @@ export const PlayerPerformance = () => {
   const handleDeleteRecord = async (recordId) => {
     if (!window.confirm('Are you sure you want to delete this performance record?')) return;
     try {
+      if (import.meta.env.VITE_DEMO_MODE === 'true') {
+        const saved = JSON.parse(localStorage.getItem('sportiq_demo_performance') || '[]');
+        const next = saved.filter((record) => String(record.id) !== String(recordId));
+        localStorage.setItem('sportiq_demo_performance', JSON.stringify(next));
+        setRecords(next);
+        return;
+      }
       await performanceService.deleteRecord(recordId);
       await loadData();
     } catch (err) {
@@ -162,11 +187,14 @@ export const PlayerPerformance = () => {
       header: 'Data Confidence',
       key: 'data_confidence_score',
       render: (r) => {
-        const score = r.data_confidence_score || 65.0;
-        const colorClass = getConfidenceColor(score);
+        const score = r.data_confidence_score;
+        if (score == null || !Number.isFinite(Number(score))) {
+          return <span className="text-xs text-[#94A3B8]">Not available</span>;
+        }
+        const colorClass = getConfidenceColor(Number(score));
         return (
           <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${colorClass}`}>
-            {score.toFixed(0)}%
+            {Number(score).toFixed(0)}%
           </span>
         );
       }

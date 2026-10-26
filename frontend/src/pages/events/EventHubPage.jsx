@@ -46,6 +46,12 @@ export const EventHubPage = () => {
   const [bookmarkingId, setBookmarkingId] = useState(null);
 
   const fetchEvents = async () => {
+    if (import.meta.env.VITE_DEMO_MODE === 'true') {
+      setEvents([]);
+      setTotalEvents(0);
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
       const params = {

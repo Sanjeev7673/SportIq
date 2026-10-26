@@ -65,6 +65,13 @@ export const AIVideoAnalysis = () => {
   const [deleteError, setDeleteError] = useState('');
 
   const loadData = async () => {
+    if (import.meta.env.VITE_DEMO_MODE === 'true') {
+      setProfile(JSON.parse(localStorage.getItem('sportiq_demo_profile') || 'null'));
+      setCatalog([]);
+      setAssessments([]);
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
       const [profRes, catalogRes, myAssessmentsRes] = await Promise.all([
@@ -117,6 +124,10 @@ export const AIVideoAnalysis = () => {
 
   const handleUploadSubmit = async (e) => {
     e.preventDefault();
+    if (import.meta.env.VITE_DEMO_MODE === 'true') {
+      setUploadError('Demo preview only: your video is selected on this device, but server upload and AI processing are not connected. No analysis has been generated.');
+      return;
+    }
     if (!videoFile) {
       setUploadError('Please select a video file to upload.');
       return;

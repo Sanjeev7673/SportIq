@@ -75,3 +75,87 @@ def test_overall_status_matrix():
     assert overall_report_status("pose_metrics_available", "failed") == "partial_pose_only"
     assert overall_report_status("insufficient_pose_visibility", "complete") == "partial_ai_only"
     assert overall_report_status("insufficient_pose_visibility", "not_configured") == "analysis_incomplete"
+
+
+# ---- additional failure-path coverage -------------------------------------------------
+
+
+def _files_in_upload_dir():
+    from app.main import UPLOAD_DIR
+    return set(os.listdir(UPLOAD_DIR))
+
+
+def test_empty_file_returns_400_and_leaves_nothing_behind(client, auth, tmp_path):
+    before = _files_in_upload_dir()
+    empty = tmp_path / "empty.mp4"
+    empty.write_bytes(b"")
+    r = _upload(client, auth, empty, "empty.mp4")
+    assert r.status_code == 400 and "empty" in r.json()["detail"].lower()
+    assert _files_in_upload_dir() == before
+
+
+def test_oversize_file_returns_413_and_is_removed(client, auth, tmp_path, monkeypatch):
+    import app.main as m
+    monkeypatch.setattr(m, "MAX_VIDEO_MB", 1)
+    before = _files_in_upload_dir()
+    big = tmp_path / "big.mp4"
+    big.write_bytes(b"\\0" * (1024 * 1024 + 10))
+    r = _upload(client, auth, big, "big.mp4")
+    assert r.status_code == 413 and "1 MB" in r.json()["detail"]
+    assert _files_in_upload_dir() == before
+
+
+def test_invalid_or_missing_token_is_rejected(client, video_path):
+    with open(video_path, "rb") as f:
+        r = client.post("/api/v1/athletes/me/videos", headers={"Authorization": "Bearer not-a-token"}, data={"sport": "Football"}, files={"video": ("c.mp4", f, "video/mp4")})
+    assert r.status_code == 401
+    assert client.get("/api/v1/reports").status_code == 401
+
+
+def test_non_athlete_cannot_upload(client, video_path):
+    client.post("/api/v1/auth/register", json={"name": "Coach Person", "email": "coach-upload@example.com", "password": "password123", "role": "COACH"})
+    tok = client.post("/api/v1/auth/login", json={"email": "coach-upload@example.com", "password": "password123"}).json()["access_token"]
+    assert _upload(client, {"Authorization": f"Bearer {tok}"}, video_path).status_code == 403
+
+
+def test_video_without_a_person_is_saved_as_limited_not_complete(client, auth, video_path):
+    """Uses real OpenCV + MediaPipe on a synthetic clip with no person (no mocks)."""
+    r = _upload(client, auth, video_path)
+    assert r.status_code == 201
+    body = r.json()
+    assert body["analysis_status"] == "insufficient_pose_visibility"
+    assert body["report_status"]["overall"] == "analysis_incomplete"
+    assert body["analysis"]["metrics"]["frames_with_pose"] == 0
+
+
+def test_analysis_failed_status_returns_422_and_cleans_up(client, auth, video_path, monkeypatch):
+    from tests.conftest import AI_OK
+    _patch(monkeypatch, {"status": "analysis_failed", "summary": "Pose analysis failed (RuntimeError).", "metrics": {}, "limitations": []}, AI_OK)
+    before = _files_in_upload_dir()
+    assert _upload(client, auth, video_path).status_code == 422
+    assert _files_in_upload_dir() == before
+
+
+def test_unexpected_exception_returns_generic_500_without_leaking_details_and_cleans_up(client, auth, video_path, monkeypatch):
+    import app.sport_analysis as sa
+    def boom(*a, **k):
+        raise RuntimeError("secret /srv/path/leak")
+    monkeypatch.setattr(sa, "analyze_video", boom)
+    before = _files_in_upload_dir()
+    r = _upload(client, auth, video_path)
+    assert r.status_code == 500
+    assert "secret" not in r.text and "/srv/path" not in r.text
+    assert _files_in_upload_dir() == before
+
+
+def test_database_failure_during_save_cleans_up_file(client, auth, video_path, monkeypatch):
+    from tests.conftest import POSE_OK, AI_OK
+    from sqlalchemy.orm import Session
+    _patch(monkeypatch, POSE_OK, AI_OK)
+    def fail_commit(self):
+        raise RuntimeError("db down")
+    monkeypatch.setattr(Session, "commit", fail_commit)
+    before = _files_in_upload_dir()
+    r = _upload(client, auth, video_path)
+    assert r.status_code == 500
+    assert _files_in_upload_dir() == before

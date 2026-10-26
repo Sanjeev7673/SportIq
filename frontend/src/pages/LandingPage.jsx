@@ -16,7 +16,7 @@ const features = [
 export default function LandingPage(){
  const [active,setActive]=useState(0); const [menuOpen,setMenuOpen]=useState(false); const slide=slides[active];
  const navigate = useNavigate();
- const enterSportIQ = () => navigate('/player/dashboard');
+ const enterSportIQ = () => navigate('/player/dashboard?showcase=1');
  useEffect(() => {
    const onKeyDown = (event) => {
      if (event.key !== 'Enter' || event.defaultPrevented || event.repeat) return;

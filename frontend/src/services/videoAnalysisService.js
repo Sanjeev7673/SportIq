@@ -10,9 +10,7 @@ export const videoAnalysisService = {
   // Upload video assessment with upload progress callback
   uploadVideoAssessment: async (formData, onUploadProgress) => {
     const res = await api.post('/video-assessments/upload', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+      // Let the browser/Axios set the multipart boundary automatically.
       onUploadProgress: (progressEvent) => {
         if (onUploadProgress && progressEvent.total) {
           const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);

@@ -38,6 +38,9 @@ const reportToAssessment = (report) => {
     }
   });
   const status = report?.analysis_status || 'analysis_pending';
+  const aiCoachReview = metrics?.ai_coach_review && typeof metrics.ai_coach_review === 'object'
+    ? metrics.ai_coach_review
+    : null;
   const summary = report?.strengths || 'No analysis summary was returned by the server.';
   return {
     ...report,
@@ -56,6 +59,9 @@ const reportToAssessment = (report) => {
     analysis_result: {
       summary,
       observable_metrics: observableMetrics,
+      ai_coach_review: aiCoachReview,
+      observations: aiCoachReview?.observations || [],
+      recommendations: aiCoachReview?.recommendations || [],
       limitations: report?.improvements || '',
     },
     local_review_only: false,

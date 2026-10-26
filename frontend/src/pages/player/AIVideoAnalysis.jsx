@@ -32,6 +32,7 @@ import Input from '../../components/common/Input';
 import Table from '../../components/common/Table';
 import Loader from '../../components/common/Loader';
 import EmptyState from '../../components/common/EmptyState';
+import { MAX_VIDEO_MB } from '../../utils/constants';
 import {
   formatDate,
   getScoreColor,
@@ -121,8 +122,13 @@ export const AIVideoAnalysis = () => {
       e.target.value = '';
       return;
     }
-    if (file.size > 100 * 1024 * 1024) {
-      setUploadError('Video file exceeds the 100 MB size limit.');
+    if (file.size === 0) {
+      setUploadError('The selected video file is empty.');
+      e.target.value = '';
+      return;
+    }
+    if (file.size > MAX_VIDEO_MB * 1024 * 1024) {
+      setUploadError(`Video file exceeds the ${MAX_VIDEO_MB} MB size limit.`);
       e.target.value = '';
       return;
     }
@@ -143,6 +149,7 @@ export const AIVideoAnalysis = () => {
 
   const handleUploadSubmit = async (e) => {
     e.preventDefault();
+    if (uploading) return; // block duplicate submissions while an upload/analysis is running
     if (!videoFile) {
       setUploadError('Please select a video file to upload.');
       return;
@@ -552,7 +559,7 @@ export const AIVideoAnalysis = () => {
               <span className="text-xs font-semibold text-[#F8FAFC] flex items-center gap-2">
                 <Video className="w-4 h-4 text-[#06B6D4]" /> Select Training Video (MP4, MOV, WEBM)
               </span>
-              <span className="text-[10px] text-[#94A3B8]">Max size: 100 MB</span>
+              <span className="text-[10px] text-[#94A3B8]">Max size: {MAX_VIDEO_MB} MB</span>
             </div>
 
             <label className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#06B6D4]/10 hover:bg-[#06B6D4]/20 text-[#06B6D4] border border-[#06B6D4]/30 text-xs font-bold cursor-pointer transition-colors">

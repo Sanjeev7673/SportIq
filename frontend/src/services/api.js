@@ -10,23 +10,33 @@ const isLocalHost = () => {
     host.startsWith('192.168.') || host.startsWith('10.');
 };
 
-// Never silently route production traffic to an old provider or a fake API.
-// Configure VITE_API_URL to the actual deployed API URL when the backend is deployed.
+// Production must point to a real API deployment. Never silently use an old provider.
 const getApiBaseUrl = () => configuredApi || (isLocalHost() ? LOCAL_API : '');
 
 const api = axios.create({
   baseURL: getApiBaseUrl(),
-  headers: { 'Content-Type': 'application/json' },
-  timeout: 120000,
+  timeout: 180000,
 });
 
 api.interceptors.request.use(
   (config) => {
     if (!config.baseURL) {
       return Promise.reject(new Error(
-        'SportIQ backend is not configured yet. The frontend is online, but the API deployment URL has not been connected.'
+        'SportIQ API is not connected yet. Sign-in, profile sync, and video analysis need the live backend URL.'
       ));
     }
+
+    // Axios must generate the multipart boundary itself for video uploads.
+    if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+      delete config.headers?.['Content-Type'];
+      delete config.headers?.['content-type'];
+    } else if (config.data && typeof config.data === 'object' && !(config.data instanceof Blob)) {
+      config.headers = config.headers || {};
+      if (!config.headers['Content-Type'] && !config.headers['content-type']) {
+        config.headers['Content-Type'] = 'application/json';
+      }
+    }
+
     const token = typeof localStorage !== 'undefined' ? localStorage.getItem('sportiq_token') : null;
     config.headers = config.headers || {};
     if (token) config.headers.Authorization = `Bearer ${token}`;
@@ -41,15 +51,17 @@ api.interceptors.response.use(
   (error) => {
     const status = error.response?.status;
     if (status === 401) {
-      localStorage.removeItem('sportiq_token');
-      localStorage.removeItem('sportiq_user');
+      if (typeof localStorage !== 'undefined') {
+        localStorage.removeItem('sportiq_token');
+        localStorage.removeItem('sportiq_user');
+      }
       if (typeof window !== 'undefined') window.dispatchEvent(new Event('sportiq:unauthorized'));
     }
     const serverMessage = error.response?.data?.message || error.response?.data?.detail || error.response?.data?.error;
     const message = serverMessage || (error.code === 'ECONNABORTED'
       ? 'The request timed out. Try a shorter video or retry.'
       : !error.response
-        ? error.message || 'Cannot connect to SportIQ services. Check the backend deployment and API URL.'
+        ? error.message || 'Cannot connect to SportIQ services. The live API URL must be configured.'
         : error.message || 'Request failed. Please try again.');
     const normalizedError = new Error(typeof message === 'string' ? message : 'Request failed. Please try again.');
     normalizedError.status = status;

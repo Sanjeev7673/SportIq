@@ -1,4 +1,5 @@
 import api from './api';
+import { MAX_VIDEO_MB } from '../utils/constants';
 
 const LOCAL_CATALOG = [
   { sport: 'Football', assessment_types: [
@@ -94,8 +95,11 @@ export const videoAnalysisService = {
     if (!(file.type.startsWith('video/') || allowedExtensions.test(file.name))) {
       throw new Error('Unsupported video format. Choose MP4, MOV, WebM, or MKV.');
     }
-    if (file.size > 250 * 1024 * 1024) {
-      throw new Error('Video exceeds the server limit of 250 MB.');
+    if (file.size === 0) {
+      throw new Error('The selected video file is empty.');
+    }
+    if (file.size > MAX_VIDEO_MB * 1024 * 1024) {
+      throw new Error(`Video exceeds the server limit of ${MAX_VIDEO_MB} MB.`);
     }
     outgoing.append('video', file, file.name);
     const response = await api.post('/athletes/me/videos', outgoing, {

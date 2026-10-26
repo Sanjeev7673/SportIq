@@ -159,16 +159,24 @@ export const AIVideoAnalysis = () => {
         file_size_bytes: videoFile.size,
         notes: notes.trim(),
         uploaded_at: new Date().toISOString(),
-        status: 'LOCAL_REVIEW_ONLY',
-        processing_status: 'LOCAL_REVIEW_ONLY',
+        status: 'DEMO_REPORT',
+        processing_status: 'ILLUSTRATIVE_DEMO_ONLY',
         local_review_only: true,
+        demo_report: true,
+        demo_metrics: {
+          movement_control: 82,
+          sprint_form: 76,
+          balance: 79,
+          consistency: 84,
+          recommendation: 'Use side-on, full-body footage in good lighting for a real assessment. Review sprint posture and arm drive with a qualified coach.',
+        },
       };
       const savedReview = { ...review };
       let existing = [];
       try { existing = JSON.parse(localStorage.getItem('sportiq_local_video_reviews') || '[]'); } catch { existing = []; }
       localStorage.setItem('sportiq_local_video_reviews', JSON.stringify([savedReview, ...existing]));
       setAssessments((current) => [review, ...current]);
-      setLocalReviewMessage('Local review saved. The video was not uploaded and no AI model ran.');
+      setLocalReviewMessage('Illustrative demo report created. Your video stayed on this device; no backend upload or AI model ran.');
       setVideoFile(null);
       if (videoPreviewUrl) URL.revokeObjectURL(videoPreviewUrl);
       setVideoPreviewUrl(null);
@@ -675,6 +683,23 @@ export const AIVideoAnalysis = () => {
       >
         {loadingDetail ? (
           <Loader message="Loading video validation gates and AI biomechanical intelligence..." className="py-16" />
+        ) : inspectAssessment?.demo_report ? (
+          <div className="space-y-4">
+            {inspectAssessment.previewUrl && <video src={inspectAssessment.previewUrl} controls className="w-full max-h-72 rounded-xl bg-black" />}
+            <div className="rounded-xl border border-cyan-500/30 bg-cyan-500/5 p-4 space-y-3">
+              <div>
+                <h3 className="font-semibold text-cyan-300">Illustrative showcase report</h3>
+                <p className="text-xs text-amber-300 mt-1">Demo values only — this is not AI-generated analysis or a real athlete assessment.</p>
+              </div>
+              <p className="text-sm text-[#F8FAFC]">File: {inspectAssessment.original_filename}</p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {Object.entries(inspectAssessment.demo_metrics || {}).filter(([key]) => key !== 'recommendation').map(([key, value]) => <div key={key} className="rounded-lg bg-[#0B1220] border border-[#1E293B] p-3"><span className="block text-[10px] uppercase text-[#94A3B8]">{key.replaceAll('_', ' ')}</span><strong className="text-xl text-[#F8FAFC]">{value}<span className="text-xs text-[#94A3B8]">/100</span></strong></div>)}
+              </div>
+              <div><h4 className="text-xs font-bold text-cyan-300 mb-1">Suggested next step</h4><p className="text-sm text-[#F8FAFC]">{inspectAssessment.demo_metrics?.recommendation}</p></div>
+              <p className="text-xs text-[#94A3B8]">The video remains on this device. Only report metadata is stored in browser storage. Connect a working analysis backend to replace illustrative values with measured results.</p>
+            </div>
+            <div className="flex justify-end"><Button variant="secondary" size="sm" onClick={() => setInspectAssessment(null)}>Close report</Button></div>
+          </div>
         ) : inspectAssessment?.local_review_only ? (
           <div className="space-y-4">
             {inspectAssessment.previewUrl && <video src={inspectAssessment.previewUrl} controls className="w-full max-h-72 rounded-xl bg-black" />}

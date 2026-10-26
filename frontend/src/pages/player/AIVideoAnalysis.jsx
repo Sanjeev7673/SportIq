@@ -427,11 +427,11 @@ export const AIVideoAnalysis = () => {
         <div className="flex items-center gap-2.5">
           <ShieldCheck className="w-5 h-5 text-[#06B6D4] shrink-0" />
           <span className="text-[#94A3B8]">
-            <strong className="text-[#F8FAFC]">Evidence Immutability Policy:</strong> Athletes can edit or delete submissions <strong>only prior to coach verification</strong>. Once verified by a certified coach, the record becomes <strong>locked and immutable</strong> for talent scouting.
+            <strong className="text-[#F8FAFC]">Analysis Integrity:</strong> The current API stores video reports and experimental pose measurements. Coach verification, report deletion, and immutable evidence locking are not implemented in this backend yet.
           </span>
         </div>
         <span className="shrink-0 px-2.5 py-1 rounded-full bg-[#22C55E]/10 text-[#22C55E] border border-[#22C55E]/30 text-[11px] font-semibold flex items-center gap-1">
-          <Lock className="w-3 h-3" /> Secure Evidence
+          <Lock className="w-3 h-3" /> Experimental Analysis
         </span>
       </div>
 
@@ -461,7 +461,7 @@ export const AIVideoAnalysis = () => {
             <span className="text-3xl font-extrabold text-[#06B6D4] font-display">
               {avgConfidence !== '--' ? `${avgConfidence}%` : '--'}
             </span>
-            <span className="text-xs text-[#94A3B8]">Min Gate: 70%</span>
+            <span className="text-xs text-[#94A3B8]">No validated confidence score</span>
           </div>
         </Card>
       </div>
@@ -469,7 +469,7 @@ export const AIVideoAnalysis = () => {
       {/* Assessment History Table */}
       <Card
         title="Daily Video Assessment History"
-        subtitle="Chronological list of all uploaded training videos, verification status, and AI pros/cons breakdowns"
+        subtitle="Uploaded video reports, experimental pose measurements, and processing status returned by the backend"
         action={
           <Button onClick={loadData} variant="ghost" size="sm" icon={RefreshCw}>
             Refresh
@@ -784,7 +784,7 @@ export const AIVideoAnalysis = () => {
                   <div className="w-full bg-[#1E293B] rounded-full h-1.5 overflow-hidden">
                     <div
                       className="h-full bg-[#06B6D4]"
-                      style={{ width: `${inspectAssessment?.analysis_result?.analysis_confidence || 80}%` }}
+                      style={{ width: `${inspectAssessment?.analysis_result?.analysis_confidence ?? 0}%` }}
                     />
                   </div>
                 </div>

@@ -112,7 +112,7 @@ export const PlayerProfile = () => {
     const objectUrl = URL.createObjectURL(file);
     setPreviewUrl(objectUrl);
 
-    // Demo mode must never send profile media to the backend.
+    // Keep profile media local when server uploads are disabled.
     if (profile?.id && import.meta.env.VITE_DEMO_MODE !== 'true') {
       setUploadingPhoto(true);
       try {
@@ -127,7 +127,7 @@ export const PlayerProfile = () => {
       }
     } else if (import.meta.env.VITE_DEMO_MODE === 'true') {
       setFormData((prev) => ({ ...prev, profile_image: '' }));
-      setMessage('Preview only: the photo is shown temporarily on this page and will not be uploaded or saved.');
+      setMessage('Photo preview loaded. The image has not been uploaded or saved.');
     } else {
       setMessage('Profile photo preview loaded. It will be saved when you create your profile.');
     }
@@ -143,7 +143,7 @@ export const PlayerProfile = () => {
       const saved = { ...formData, id: profile?.id || 'local-demo-profile', profile_image: formData.profile_image || '' };
       localStorage.setItem('sportiq_demo_profile', JSON.stringify(saved));
       setProfile(saved);
-      setMessage('Profile saved on this demo device. It has not been sent to a server.');
+      setMessage('Profile saved successfully on this device.');
       setSaving(false);
       return;
     }

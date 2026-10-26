@@ -39,4 +39,4 @@ steps:
       - --cpu=2
       - --timeout=900
       - --max-instances=2
-      - --set-env-vars=BACKEND_CORS_ORIGINS=https://sportiq-theta.vercel.app,PUBLIC_API_URL=https://sportiq-theta.vercel.app
+      - --set-env-vars=BACKEND_CORS_ORIGINS=https://sportiq-theta.vercel.app

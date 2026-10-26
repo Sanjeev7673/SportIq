@@ -58,7 +58,6 @@ export const AuthProvider = ({ children }) => {
     return () => { active = false; };
   }, []);
 
-  // Keep React state in sync when the API rejects an expired/invalid token.
   useEffect(() => {
     const onUnauthorized = () => {
       setUser(null);
@@ -68,11 +67,22 @@ export const AuthProvider = ({ children }) => {
     return () => window.removeEventListener('sportiq:unauthorized', onUnauthorized);
   }, []);
 
-  const login = async (identifier, password) => {
+  const login = async (identifier, password, displayName = '') => {
     if (import.meta.env.VITE_DEMO_MODE === 'true') {
+      const normalizedEmail = identifier.trim().toLowerCase();
+      const previousUser = authService.getCurrentUser();
+      const enteredName = displayName.trim();
+      const inferredName = normalizedEmail.split('@')[0]
+        .replace(/[._-]+/g, ' ')
+        .replace(/\b\w/g, (letter) => letter.toUpperCase());
       const data = {
         access_token: 'sportiq-demo-session',
-        user: { id: 'demo-player', name: 'Demo Player', email: identifier.trim(), role: 'PLAYER' },
+        user: {
+          id: 'demo-player',
+          name: enteredName || previousUser?.name || inferredName || 'Player',
+          email: normalizedEmail,
+          role: 'PLAYER',
+        },
       };
       localStorage.setItem('sportiq_token', data.access_token);
       localStorage.setItem('sportiq_user', JSON.stringify(data.user));

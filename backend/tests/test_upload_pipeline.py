@@ -99,7 +99,7 @@ def test_oversize_file_returns_413_and_is_removed(client, auth, tmp_path, monkey
     monkeypatch.setattr(m, "MAX_VIDEO_MB", 1)
     before = _files_in_upload_dir()
     big = tmp_path / "big.mp4"
-    big.write_bytes(b"\\0" * (1024 * 1024 + 10))
+    big.write_bytes(b"\0" * (1024 * 1024 + 10))
     r = _upload(client, auth, big, "big.mp4")
     assert r.status_code == 413 and "1 MB" in r.json()["detail"]
     assert _files_in_upload_dir() == before

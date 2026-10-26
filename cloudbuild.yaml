@@ -7,6 +7,15 @@ options:
   logging: CLOUD_LOGGING_ONLY
 
 steps:
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    id: Ensure Artifact Registry repository
+    entrypoint: bash
+    args:
+      - -ceu
+      - |
+        gcloud artifacts repositories describe "${_REPOSITORY}" --location="${_REGION}" >/dev/null 2>&1 || \
+          gcloud artifacts repositories create "${_REPOSITORY}" --repository-format=docker --location="${_REGION}" --description="SportIQ API container images"
+
   - name: gcr.io/cloud-builders/docker
     id: Build SportIQ API
     args:

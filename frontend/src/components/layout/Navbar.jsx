@@ -162,11 +162,13 @@ export const Navbar = ({ onToggleSidebar }) => {
         {user ? (
           <div className="flex items-center gap-2 sm:gap-3">
             <Link
-              to={user.role === 'ADMIN' ? '/admin/profile' : user.role === 'PLAYER' ? '/player/profile' : user.role === 'ORGANIZER' ? '/organizer/profile' : '#'}
-              className="hidden sm:flex flex-col items-end hover:opacity-80 transition-opacity"
+              to={user.role === 'ADMIN' ? '/admin/profile' : user.role === 'PLAYER' ? '/player/profile' : user.role === 'ORGANIZER' ? '/organizer/profile' : '/player/profile'}
+              aria-label="Open your profile settings"
+              title="Open profile settings"
+              className="flex flex-col items-end hover:opacity-80 transition-opacity cursor-pointer rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-[#06B6D4]"
             >
-              <span className="text-xs sm:text-sm font-semibold text-[#F8FAFC]">{user.name}</span>
-              <span className="text-[11px] text-[#94A3B8]">{user.email || user.phone_number}</span>
+              <span className="text-xs sm:text-sm font-semibold text-[var(--text-primary)]">{user.name || 'Player'}</span>
+              <span className="text-[11px] text-[var(--text-secondary)]">{user.email || user.phone_number}</span>
             </Link>
 
             <Badge variant="primary" className={getRoleBadgeColor(user.role)}>

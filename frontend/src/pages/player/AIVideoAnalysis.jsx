@@ -283,18 +283,22 @@ export const AIVideoAnalysis = () => {
         </Badge>
       );
     }
-    if (r.status === 'PENDING_VERIFICATION' || r.processing_status === 'COMPLETED') {
-      return (
-        <Badge variant="warning" size="sm" className="font-semibold flex items-center gap-1">
-          <Clock className="w-3 h-3" /> Pending Review
-        </Badge>
-      );
+    if (r.status === 'ANALYSIS_COMPLETE' || r.processing_status === 'pose_metrics_available') {
+      return <Badge variant="success" size="sm" className="font-semibold flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Analysis Complete</Badge>;
     }
-    return (
-      <Badge variant="ai" size="sm" className="animate-pulse">
-        {r.processing_status}
-      </Badge>
-    );
+    if (r.status === 'ANALYSIS_LIMITED' || r.processing_status === 'insufficient_pose_visibility') {
+      return <Badge variant="warning" size="sm" className="font-semibold flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> Limited Evidence</Badge>;
+    }
+    if (r.status === 'ANALYSIS_UNAVAILABLE' || r.processing_status === 'pose_analysis_unavailable') {
+      return <Badge variant="danger" size="sm">Analysis Unavailable</Badge>;
+    }
+    if (r.status === 'VIDEO_READ_FAILED' || r.processing_status === 'video_read_failed') {
+      return <Badge variant="danger" size="sm">Video Could Not Be Read</Badge>;
+    }
+    if (r.status === 'PENDING_VERIFICATION') {
+      return <Badge variant="warning" size="sm"><Clock className="w-3 h-3 inline mr-1" />Pending Review</Badge>;
+    }
+    return <Badge variant="ai" size="sm">{String(r.processing_status || 'Analysis status unknown').replaceAll('_', ' ')}</Badge>;
   };
 
   const validatedAssessments = assessments.filter((a) => a.validation_status === 'VALIDATED' && a.analysis_result?.overall_score);

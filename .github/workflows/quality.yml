@@ -52,9 +52,24 @@ jobs:
     name: Live backend health smoke test
     runs-on: ubuntu-latest
     steps:
-      - name: Wake and verify the deployed API
+      - name: Wake and verify the configured deployed API
+        env:
+          BACKEND_HEALTH_URL: ${{ vars.SPORTIQ_BACKEND_HEALTH_URL }}
         run: |
+          if [ -z "$BACKEND_HEALTH_URL" ]; then
+            echo "::notice::Skipping live backend health check because the repository variable SPORTIQ_BACKEND_HEALTH_URL is not configured."
+            exit 0
+          fi
+
+          case "$BACKEND_HEALTH_URL" in
+            https://*) ;;
+            *)
+              echo "::error::SPORTIQ_BACKEND_HEALTH_URL must be an HTTPS health endpoint URL."
+              exit 1
+              ;;
+          esac
+
           curl --fail --silent --show-error \
             --retry 5 --retry-all-errors --retry-delay 10 \
             --connect-timeout 10 --max-time 35 \
-            https://sportiq-2.onrender.com/health
+            "$BACKEND_HEALTH_URL"

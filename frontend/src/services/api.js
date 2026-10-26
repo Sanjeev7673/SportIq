@@ -57,12 +57,25 @@ api.interceptors.response.use(
       }
       if (typeof window !== 'undefined') window.dispatchEvent(new Event('sportiq:unauthorized'));
     }
-    const serverMessage = error.response?.data?.message || error.response?.data?.detail || error.response?.data?.error;
-    const message = serverMessage || (error.code === 'ECONNABORTED'
+    const data = error.response?.data;
+    // FastAPI validation errors return `detail` as an array of {msg} objects.
+    const detailText = Array.isArray(data?.detail)
+      ? data.detail.map((d) => d?.msg).filter(Boolean).join('; ')
+      : data?.detail;
+    const serverMessage = data?.message || detailText || data?.error;
+    const friendlyByStatus = {
+      413: 'The video is too large for the server. Choose a smaller file.',
+      502: 'The SportIQ server is unavailable right now. Please try again shortly.',
+      503: 'The SportIQ server is unavailable right now. Please try again shortly.',
+      504: 'The SportIQ server took too long to respond. Please try again.',
+    };
+    const message = (typeof serverMessage === 'string' && serverMessage) || friendlyByStatus[status] || (error.code === 'ECONNABORTED'
       ? 'The request timed out. Try a shorter video or retry.'
       : !error.response
-        ? error.message || 'Cannot connect to SportIQ services. The live API URL must be configured.'
-        : error.message || 'Request failed. Please try again.');
+        ? 'Cannot reach the SportIQ server. Check your connection and that the live API URL is configured.'
+        : status >= 500
+          ? 'The server hit an error while processing the request. Please try again.'
+          : error.message || 'Request failed. Please try again.');
     const normalizedError = new Error(typeof message === 'string' ? message : 'Request failed. Please try again.');
     normalizedError.status = status;
     normalizedError.code = error.code;

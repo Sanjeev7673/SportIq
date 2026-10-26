@@ -6,6 +6,7 @@ as scientifically measured athletic performance.
 """
 from __future__ import annotations
 
+import asyncio
 import os
 import smtplib
 from email.message import EmailMessage
@@ -55,6 +56,24 @@ if not JWT_SECRET:
     print("WARNING: JWT_SECRET_KEY is not set; using a temporary secret. Set it in the backend environment.", flush=True)
 JWT_ALGORITHM = "HS256"
 TOKEN_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "720"))
+
+# Bound expensive video analysis to avoid exhausting CPU/memory under concurrent uploads.
+ANALYSIS_SLOTS = asyncio.Semaphore(max(1, int(os.getenv("ANALYSIS_CONCURRENCY", "2"))))
+
+def overall_report_status(pose_status: str, ai_status: str) -> str:
+    pose_ok = pose_status == "pose_metrics_available"
+    ai_ok = ai_status == "complete"
+    if pose_ok and ai_ok: return "complete"
+    if pose_ok: return "partial_pose_only"
+    if ai_ok: return "partial_ai_only"
+    return "analysis_incomplete"
+
+def load_metrics(raw: str | None) -> dict:
+    try:
+        value = json.loads(raw or "{}")
+        return value if isinstance(value, dict) else {}
+    except (TypeError, ValueError):
+        return {}
 
 class Base(DeclarativeBase):
     pass
@@ -412,41 +431,50 @@ async def upload_performance_video(sport: str = Form(...), discipline: str = For
         target.unlink(missing_ok=True); raise
     finally:
         await video.close()
-    # Run experimental 2D pose estimation when CV dependencies are available. This does not
-    # claim validated sports timing, jump distance, or competition-grade biomechanics.
-    from app.sport_analysis import analyze_video
-    # OpenCV/MediaPipe are blocking; run them off the event loop so /health and other requests stay responsive.
-    analysis = await run_in_threadpool(analyze_video, target, sport.strip(), discipline.strip())
-    if analysis["status"] in ("video_read_failed", "analysis_failed"):
+    try:
+        async with ANALYSIS_SLOTS:
+            # Experimental 2D pose estimation; not a validated sports performance score.
+            from app.sport_analysis import analyze_video
+            analysis = await run_in_threadpool(analyze_video, target, sport.strip(), discipline.strip())
+            if analysis["status"] in ("video_read_failed", "analysis_failed"):
+                target.unlink(missing_ok=True)
+                detail = "The server could not read this video. Re-export it as H.264 MP4 and try again." if analysis["status"] == "video_read_failed" else analysis.get("summary", "Pose analysis failed.")
+                raise HTTPException(status_code=422, detail=detail)
+            from app.gemini_video_review import analyze_keyframes_with_gemini
+            ai_review = await run_in_threadpool(analyze_keyframes_with_gemini, target, sport.strip(), discipline.strip())
+            analysis["ai_coach_review"] = ai_review
+            strengths = analysis.get("summary", "Video received; pose analysis did not produce measurements.")
+            if ai_review.get("status") == "complete":
+                strengths = ai_review.get("summary", strengths)
+                if analysis["status"] == "pose_metrics_available":
+                    strengths += " Separate experimental 2D pose measurements are also available below."
+            elif analysis["status"] == "pose_metrics_available":
+                strengths += " Available measurements are experimental and should be reviewed by a qualified coach."
+            improvements_parts = ["Limitations: " + " ".join(analysis.get("limitations", []))]
+            if ai_review.get("status") == "complete":
+                if ai_review.get("recommendations"):
+                    improvements_parts.append("AI coaching cues: " + " ".join(ai_review["recommendations"]))
+                if ai_review.get("limitations"):
+                    improvements_parts.append("AI review limitations: " + " ".join(ai_review["limitations"]))
+            else:
+                improvements_parts.append(ai_review.get("summary", "AI coach review was not completed."))
+            improvements = " ".join(improvements_parts)
+            metrics = dict(analysis.get("metrics", {}))
+            metrics["ai_coach_review"] = ai_review
+            report_status = {"pose_analysis": analysis["status"], "ai_review": ai_review.get("status", "unknown"), "overall": overall_report_status(analysis["status"], ai_review.get("status", ""))}
+            if ai_review.get("error_code"):
+                report_status["ai_error_code"] = ai_review["error_code"]
+            metrics["report_status"] = report_status
+            report = PerformanceReport(athlete_id=user.id, sport=sport.strip(), discipline=discipline.strip(), video_filename=filename, notes=notes.strip(), strengths=strengths, improvements=improvements, analysis_status=analysis["status"], analysis_metrics=json.dumps(metrics))
+            db.add(report); db.commit(); db.refresh(report)
+    except HTTPException:
+        raise
+    except Exception as exc:
+        db.rollback()
         target.unlink(missing_ok=True)
-        raise HTTPException(status_code=422, detail="The server could not read this video. Re-export it as H.264 MP4 and try again." if analysis["status"] == "video_read_failed" else analysis["summary"])
-    # Add an actual multimodal vision-model review of sampled frames when configured.
-    from app.gemini_video_review import analyze_keyframes_with_gemini
-    ai_review = await run_in_threadpool(analyze_keyframes_with_gemini, target, sport.strip(), discipline.strip())
-    analysis["ai_coach_review"] = ai_review
-    strengths = analysis["summary"]
-    if ai_review.get("status") == "complete":
-        strengths = ai_review["summary"]
-        if analysis["status"] == "pose_metrics_available":
-            strengths += " Separate experimental 2D pose measurements are also available below."
-    elif analysis["status"] == "pose_metrics_available":
-        strengths += " The available measurements are experimental and should be reviewed by a qualified coach."
-    improvements_parts = ["Limitations: " + " ".join(analysis.get("limitations", []))]
-    if ai_review.get("status") == "complete":
-        if ai_review.get("recommendations"):
-            improvements_parts.append("AI coaching cues: " + " ".join(ai_review["recommendations"]))
-        if ai_review.get("limitations"):
-            improvements_parts.append("AI review limitations: " + " ".join(ai_review["limitations"]))
-    elif ai_review.get("status") == "not_configured":
-        improvements_parts.append(ai_review["summary"])
-    elif ai_review.get("status") == "failed":
-        improvements_parts.append(ai_review["summary"])
-    improvements = " ".join(improvements_parts)
-    metrics = dict(analysis.get("metrics", {}))
-    metrics["ai_coach_review"] = ai_review
-    report = PerformanceReport(athlete_id=user.id, sport=sport.strip(), discipline=discipline.strip(), video_filename=filename, notes=notes.strip(), strengths=strengths, improvements=improvements, analysis_status=analysis["status"], analysis_metrics=json.dumps(metrics))
-    db.add(report); db.commit(); db.refresh(report)
-    return {"success": True, "report_id": report.id, "analysis_status": report.analysis_status, "analysis": analysis, "uploaded_bytes": size, "message": "Video saved. Experimental pose metrics are not a validated athletic performance score."}
+        print(f"Video report generation failed: {type(exc).__name__}", flush=True)
+        raise HTTPException(status_code=500, detail="Report generation failed on the server. Please try again.") from exc
+    return {"success": True, "report_id": report.id, "analysis_status": report.analysis_status, "report_status": report_status, "analysis": analysis, "uploaded_bytes": size, "message": "Video saved. Experimental pose metrics are not a validated athletic performance score."}
 
 @app.get("/api/v1/reports")
 def list_reports(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -456,7 +484,7 @@ def list_reports(user: User = Depends(get_current_user), db: Session = Depends(g
 def report_json(r: PerformanceReport, db: Session):
     athlete = db.get(User, r.athlete_id)
     profile = db.query(AthleteProfile).filter(AthleteProfile.user_id == r.athlete_id).first()
-    return {"id": r.id, "athlete_id": r.athlete_id, "athlete_name": (athlete.name if athlete and athlete.name.strip() else "Athlete"), "athlete_profile": ({"age": profile.age, "height_cm": profile.height_cm, "weight_kg": profile.weight_kg, "sport": profile.sport, "discipline": profile.discipline} if profile else None), "sport": r.sport, "discipline": r.discipline, "video_filename": r.video_filename, "notes": r.notes, "strengths": r.strengths, "improvements": r.improvements, "analysis_status": r.analysis_status, "analysis_metrics": json.loads(r.analysis_metrics or "{}"), "created_at": r.created_at.isoformat(), "qr_url": f"/api/v1/reports/{r.id}/qr", "pdf_url": f"/api/v1/reports/{r.id}/pdf"}
+    return {"id": r.id, "athlete_id": r.athlete_id, "athlete_name": (athlete.name if athlete and athlete.name.strip() else "Athlete"), "athlete_profile": ({"age": profile.age, "height_cm": profile.height_cm, "weight_kg": profile.weight_kg, "sport": profile.sport, "discipline": profile.discipline} if profile else None), "sport": r.sport, "discipline": r.discipline, "video_filename": r.video_filename, "notes": r.notes, "strengths": r.strengths, "improvements": r.improvements, "analysis_status": r.analysis_status, "analysis_metrics": load_metrics(r.analysis_metrics), "created_at": r.created_at.isoformat(), "qr_url": f"/api/v1/reports/{r.id}/qr", "pdf_url": f"/api/v1/reports/{r.id}/pdf"}
 
 def owned_report(report_id: int, user: User, db: Session):
     r = db.get(PerformanceReport, report_id)
@@ -472,7 +500,7 @@ def download_report_pdf(report_id: int, user: User = Depends(get_current_user), 
     report = owned_report(report_id, user, db)
     athlete = db.get(User, report.athlete_id)
     profile = db.query(AthleteProfile).filter(AthleteProfile.user_id == report.athlete_id).first()
-    metrics = json.loads(report.analysis_metrics or "{}")
+    metrics = load_metrics(report.analysis_metrics)
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=18*mm, leftMargin=18*mm, topMargin=16*mm, bottomMargin=16*mm)
     styles = getSampleStyleSheet()

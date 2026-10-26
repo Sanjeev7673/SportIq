@@ -1,5 +1,29 @@
 import api from './api';
 
+// The FastAPI backend uses lowercase role names while the UI route guards use
+// uppercase labels. Normalize the user shape at the API boundary.
+const normalizeUser = (rawUser) => {
+  if (!rawUser || typeof rawUser !== 'object' || Array.isArray(rawUser)) return rawUser;
+  const rawRole = String(rawUser.role || '').trim().toLowerCase();
+  const roleMap = {
+    athlete: 'PLAYER',
+    player: 'PLAYER',
+    coach: 'COACH',
+    scout: 'SCOUT',
+    organizer: 'ORGANIZER',
+    organiser: 'ORGANIZER',
+    admin: 'ADMIN',
+  };
+  return {
+    ...rawUser,
+    id: rawUser.id ?? rawUser.user_id ?? rawUser.sub,
+    name: rawUser.name || rawUser.full_name || rawUser.display_name ||
+      (rawUser.email ? String(rawUser.email).split('@')[0] : 'SportIQ User'),
+    email: rawUser.email || rawUser.email_address || '',
+    role: roleMap[rawRole] || String(rawUser.role || 'PLAYER').toUpperCase(),
+  };
+};
+
 // API responses may be returned directly or wrapped in { success, data }.
 const unwrap = (value) => {
   let result = value;
@@ -17,7 +41,7 @@ const unwrap = (value) => {
 const persistSession = (rawResponse) => {
   const data = unwrap(rawResponse);
   const token = data?.access_token || data?.token;
-  const user = data?.user;
+  const user = normalizeUser(data?.user);
 
   if (typeof token !== 'string' || !token || !user || typeof user !== 'object') {
     throw new Error(data?.message || 'The server response was incomplete. Please try again or contact support.');
@@ -66,10 +90,8 @@ export const authService = {
 
   async getMe() {
     const response = unwrap(await api.get('/auth/me'));
-    // The API returns { success: true, user: {...} }; store the user object,
-    // not the surrounding response envelope.
-    const user = response?.user ?? response;
-    if (!user || typeof user !== 'object' || Array.isArray(user) || !user.id || !user.role) {
+    const user = normalizeUser(response?.user ?? response);
+    if (!user || typeof user !== 'object' || Array.isArray(user) || user.id == null || !user.role) {
       throw new Error('The server returned an invalid session response.');
     }
     localStorage.setItem('sportiq_user', JSON.stringify(user));
@@ -85,7 +107,7 @@ export const authService = {
     try {
       const raw = localStorage.getItem('sportiq_user');
       if (!raw) return null;
-      const user = JSON.parse(raw);
+      const user = normalizeUser(JSON.parse(raw));
       return user && typeof user === 'object' && !Array.isArray(user) ? user : null;
     } catch {
       localStorage.removeItem('sportiq_user');

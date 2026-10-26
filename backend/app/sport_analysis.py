@@ -67,14 +67,21 @@ def analyze_video(path: str | Path, sport: str = "", discipline: str = "") -> di
                        min_detection_confidence=0.5, min_tracking_confidence=0.5) as estimator:
             frame_index = 0
             while sampled < 120:
-                ok, frame = capture.read()
-                if not ok:
+                # grab() advances without decoding/retrieving, so skipped frames stay cheap.
+                if not capture.grab():
                     break
                 should_sample = frame_index % sample_every == 0
                 frame_index += 1
                 if not should_sample:
                     continue
+                ok, frame = capture.retrieve()
+                if not ok or frame is None:
+                    continue
                 sampled += 1
+                height, width = frame.shape[:2]
+                if max(height, width) > 640:
+                    scale = 640 / max(height, width)
+                    frame = cv2.resize(frame, (int(width * scale), int(height * scale)))
                 rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 result = estimator.process(rgb)
                 if not result.pose_landmarks:
@@ -97,6 +104,13 @@ def analyze_video(path: str | Path, sport: str = "", discipline: str = "") -> di
                     pts = [point(name) for name in names]
                     joint_angles[key].append(round(_angle(*pts), 1))
 
+    except Exception as exc:
+        return {
+            "status": "analysis_failed",
+            "summary": f"Pose analysis failed ({type(exc).__name__}).",
+            "metrics": {},
+            "limitations": limitations,
+        }
     finally:
         capture.release()
 

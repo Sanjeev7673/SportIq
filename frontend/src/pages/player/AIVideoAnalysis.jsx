@@ -54,6 +54,7 @@ export const AIVideoAnalysis = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
+  const [localReviewMessage, setLocalReviewMessage] = useState('');
 
   // Inspection / Detail Modal State
   const [inspectAssessment, setInspectAssessment] = useState(null);
@@ -66,9 +67,11 @@ export const AIVideoAnalysis = () => {
 
   const loadData = async () => {
     if (import.meta.env.VITE_DEMO_MODE === 'true') {
+      let savedReviews = [];
+      try { savedReviews = JSON.parse(localStorage.getItem('sportiq_local_video_reviews') || '[]'); } catch { localStorage.removeItem('sportiq_local_video_reviews'); }
       setProfile(JSON.parse(localStorage.getItem('sportiq_demo_profile') || 'null'));
-      setCatalog([]);
-      setAssessments([]);
+      setCatalog([{ sport: 'Football', assessment_types: [{ name: 'Sprint', description: 'Acceleration and running form' }, { name: 'Agility', description: 'Change of direction' }, { name: 'Ball Control', description: 'On-ball technical review' }] }, { sport: 'Basketball', assessment_types: [{ name: 'Sprint', description: 'Acceleration and running form' }, { name: 'Agility', description: 'Change of direction' }, { name: 'Shooting', description: 'Shooting form review' }] }]);
+      setAssessments(savedReviews);
       setLoading(false);
       return;
     }
@@ -109,33 +112,71 @@ export const AIVideoAnalysis = () => {
   }, [selectedSport, catalog]);
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (!file) return;
-
-    if (file.size > 100 * 1024 * 1024) {
-      setUploadError('Video file exceeds the 100 MB size limit.');
+    const validExtension = /\.(mp4|mov|webm|mkv)$/i.test(file.name);
+    if (!(file.type.startsWith('video/') || validExtension)) {
+      setUploadError('Choose a supported video file (MP4, MOV, WEBM, or MKV).');
+      e.target.value = '';
       return;
     }
-
+    if (file.size > 100 * 1024 * 1024) {
+      setUploadError('Video file exceeds the 100 MB size limit.');
+      e.target.value = '';
+      return;
+    }
+    if (videoPreviewUrl) URL.revokeObjectURL(videoPreviewUrl);
     setUploadError('');
+    setLocalReviewMessage('');
     setVideoFile(file);
     setVideoPreviewUrl(URL.createObjectURL(file));
   };
 
+  const clearSelectedVideo = () => {
+    if (videoPreviewUrl) URL.revokeObjectURL(videoPreviewUrl);
+    setVideoFile(null);
+    setVideoPreviewUrl(null);
+    setUploadError('');
+    setLocalReviewMessage('');
+  };
+
   const handleUploadSubmit = async (e) => {
     e.preventDefault();
-    if (import.meta.env.VITE_DEMO_MODE === 'true') {
-      setUploadError('Video upload and AI processing are currently unavailable. No analysis has been generated.');
-      return;
-    }
     if (!videoFile) {
       setUploadError('Please select a video file to upload.');
       return;
     }
 
+    setUploadError('');
+    if (import.meta.env.VITE_DEMO_MODE === 'true') {
+      const review = {
+        id: `local-review-${Date.now()}`,
+        sport: selectedSport,
+        assessment_type: selectedType,
+        original_filename: videoFile.name,
+        file_size_bytes: videoFile.size,
+        notes: notes.trim(),
+        uploaded_at: new Date().toISOString(),
+        status: 'LOCAL_REVIEW_ONLY',
+        processing_status: 'LOCAL_REVIEW_ONLY',
+        local_review_only: true,
+      };
+      const savedReview = { ...review };
+      let existing = [];
+      try { existing = JSON.parse(localStorage.getItem('sportiq_local_video_reviews') || '[]'); } catch { existing = []; }
+      localStorage.setItem('sportiq_local_video_reviews', JSON.stringify([savedReview, ...existing]));
+      setAssessments((current) => [review, ...current]);
+      setLocalReviewMessage('Local review saved. The video was not uploaded and no AI model ran.');
+      setVideoFile(null);
+      if (videoPreviewUrl) URL.revokeObjectURL(videoPreviewUrl);
+      setVideoPreviewUrl(null);
+      setNotes('');
+      setIsUploadModalOpen(false);
+      return;
+    }
+
     setUploading(true);
     setUploadProgress(0);
-    setUploadError('');
 
     try {
       const formData = new FormData();
@@ -162,6 +203,10 @@ export const AIVideoAnalysis = () => {
 
   const handleInspect = async (item) => {
     setInspectAssessment(item);
+    if (item.local_review_only) {
+      setLoadingDetail(false);
+      return;
+    }
     setLoadingDetail(true);
     try {
       const fullDetail = await videoAnalysisService.getAssessmentDetail(item.id);
@@ -175,6 +220,13 @@ export const AIVideoAnalysis = () => {
 
   const handleDeleteConfirm = async () => {
     if (!deleteTargetAssessment) return;
+    if (deleteTargetAssessment.local_review_only) {
+      const next = assessments.filter((item) => item.id !== deleteTargetAssessment.id);
+      localStorage.setItem('sportiq_local_video_reviews', JSON.stringify(next.map(({ previewUrl, ...item }) => item)));
+      setAssessments(next);
+      setDeleteTargetAssessment(null);
+      return;
+    }
     setDeleting(true);
     setDeleteError('');
     try {
@@ -189,6 +241,9 @@ export const AIVideoAnalysis = () => {
   };
 
   const getVerificationStatusBadge = (r) => {
+    if (r.local_review_only || r.status === 'LOCAL_REVIEW_ONLY') {
+      return <Badge variant="warning" size="sm">Local review only</Badge>;
+    }
     if (r.status === 'VERIFIED') {
       return (
         <Badge variant="success" size="sm" className="font-semibold flex items-center gap-1">
@@ -258,6 +313,7 @@ export const AIVideoAnalysis = () => {
       header: 'Performance Score',
       key: 'overall_score',
       render: (r) => {
+        if (r.local_review_only) return <span className="text-xs text-[#94A3B8] italic">Not analyzed</span>;
         if (r.validation_status === 'VALIDATED' && r.analysis_result?.overall_score) {
           const score = r.analysis_result.overall_score;
           return (
@@ -282,6 +338,7 @@ export const AIVideoAnalysis = () => {
       header: 'Confidence',
       key: 'analysis_confidence',
       render: (r) => {
+        if (r.local_review_only) return <span className="text-xs text-[#94A3B8] italic">No model run</span>;
         if (r.analysis_result?.analysis_confidence) {
           const conf = r.analysis_result.analysis_confidence;
           return (
@@ -307,7 +364,7 @@ export const AIVideoAnalysis = () => {
               icon={r.validation_status === 'REJECTED' || r.status === 'REJECTED' ? AlertCircle : Play}
               className={r.validation_status === 'REJECTED' || r.status === 'REJECTED' ? 'text-[#EF4444] border-[#EF4444]/30 text-xs py-1' : 'text-[#06B6D4] border-[#06B6D4]/30 text-xs py-1'}
             >
-              {r.validation_status === 'REJECTED' || r.status === 'REJECTED' ? 'Review' : 'Watch'}
+              {r.local_review_only ? 'View Notes' : r.validation_status === 'REJECTED' || r.status === 'REJECTED' ? 'Review' : 'Watch'}
             </Button>
 
             {isVerified ? (
@@ -339,13 +396,15 @@ export const AIVideoAnalysis = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
+      {localReviewMessage && <div role="status" className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-300">{localReviewMessage}</div>}
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#1E293B]">
         <div>
           <h1 className="text-2xl font-bold text-[#F8FAFC] font-display tracking-tight flex items-center gap-2.5">
             <Video className="w-6 h-6 text-[#06B6D4]" /> AI Video Performance Analysis
           </h1>
           <p className="text-xs text-[#94A3B8]">
-            Strict video validation gate, coach verification, and immutable evidence workflow
+            Review your own training videos. AI results appear only when a connected analysis service actually processes the file.
           </p>
         </div>
 
@@ -418,8 +477,8 @@ export const AIVideoAnalysis = () => {
         ) : (
           <EmptyState
             icon={Video}
-            title="No Video Assessments Found"
-            description="Record and upload your first training drill video to receive AI biomechanical validation and coach verification."
+            title="No Video Reviews Yet"
+            description="Select a training video to preview it and save your own review notes. This presentation build does not run an AI biomechanics model."
             actionLabel="Upload Assessment Video"
             onAction={() => setIsUploadModalOpen(true)}
           />
@@ -431,7 +490,7 @@ export const AIVideoAnalysis = () => {
         isOpen={isUploadModalOpen}
         onClose={() => setIsUploadModalOpen(false)}
         title="Daily Video Assessment Upload"
-        subtitle="Record or upload a smartphone training video for AI validation and biomechanical analysis"
+        subtitle="Choose a video, preview it, and save a local review record. No server upload or AI model is used in presentation mode."
         maxWidth="max-w-2xl"
       >
         <form onSubmit={handleUploadSubmit} className="space-y-4">
@@ -439,7 +498,7 @@ export const AIVideoAnalysis = () => {
             <div className="space-y-1">
               <label className="text-xs font-semibold text-[#94A3B8]">Sport Discipline</label>
               <Select
-                options={catalog.map((c) => ({ value: c.sport, label: c.sport }))}
+                options={(catalog.length ? catalog : [{ sport: 'Football' }, { sport: 'Basketball' }]).map((c) => ({ value: c.sport, label: c.sport }))}
                 value={selectedSport}
                 onChange={(e) => setSelectedSport(e.target.value)}
               />
@@ -476,9 +535,15 @@ export const AIVideoAnalysis = () => {
             </label>
 
             {videoPreviewUrl && (
-              <div className="rounded-xl overflow-hidden max-h-48 border border-[#1E293B] bg-black">
-                <video src={videoPreviewUrl} controls className="w-full max-h-48 object-contain" />
-              </div>
+              <>
+                <div className="rounded-xl overflow-hidden max-h-48 border border-[#1E293B] bg-black">
+                  <video src={videoPreviewUrl} controls className="w-full max-h-48 object-contain" />
+                </div>
+                <div className="flex items-center justify-between gap-3 text-xs text-[#94A3B8]">
+                  <span className="truncate">{videoFile?.name} · {videoFile ? (videoFile.size / 1024 / 1024).toFixed(2) : '0'} MB</span>
+                  <button type="button" onClick={clearSelectedVideo} className="text-[#EF4444] hover:underline">Remove video</button>
+                </div>
+              </>
             )}
           </div>
 
@@ -514,8 +579,8 @@ export const AIVideoAnalysis = () => {
             <Button variant="secondary" size="sm" onClick={() => setIsUploadModalOpen(false)} disabled={uploading}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" size="sm" loading={uploading} icon={Upload}>
-              Submit for AI Analysis
+            <Button type="submit" variant="primary" size="sm" loading={uploading} icon={Upload} disabled={!videoFile}>
+              {import.meta.env.VITE_DEMO_MODE === 'true' ? 'Save Local Review' : 'Submit for AI Analysis'}
             </Button>
           </div>
         </form>
@@ -576,6 +641,18 @@ export const AIVideoAnalysis = () => {
       >
         {loadingDetail ? (
           <Loader message="Loading video validation gates and AI biomechanical intelligence..." className="py-16" />
+        ) : inspectAssessment?.local_review_only ? (
+          <div className="space-y-4">
+            {inspectAssessment.previewUrl && <video src={inspectAssessment.previewUrl} controls className="w-full max-h-72 rounded-xl bg-black" />}
+            <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 space-y-2">
+              <h3 className="font-semibold text-amber-400">Local review only — no AI analysis</h3>
+              <p className="text-sm text-[#F8FAFC]">File: {inspectAssessment.original_filename}</p>
+              <p className="text-xs text-[#94A3B8]">Size: {(Number(inspectAssessment.file_size_bytes || 0) / 1024 / 1024).toFixed(2)} MB · Sport: {inspectAssessment.sport} · Drill: {inspectAssessment.assessment_type}</p>
+              <p className="text-sm text-[#F8FAFC]">Review notes: {inspectAssessment.notes || 'No notes entered.'}</p>
+              <p className="text-xs text-[#94A3B8]">The video file itself stays on this device and its preview is temporary. Only the review metadata and notes are saved in browser storage. No performance score or confidence value was generated.</p>
+            </div>
+            <div className="flex justify-end"><Button variant="secondary" size="sm" onClick={() => setInspectAssessment(null)}>Close</Button></div>
+          </div>
         ) : isInvalid ? (
           <div className="space-y-5">
             <div className="rounded-2xl overflow-hidden bg-black border border-[#1E293B] max-h-64">

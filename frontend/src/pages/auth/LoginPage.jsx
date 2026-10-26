@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Activity, Lock, User, AlertCircle, CheckCircle2 } from 'lucide-react';
@@ -7,14 +7,11 @@ import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 import ThemeToggle from '../../components/common/ThemeToggle';
 import ForgotPasswordModal from '../../components/auth/ForgotPasswordModal';
-import { wakeBackend } from '../../services/api';
 
 // Review preview: demo authentication is enabled only for the review-ready-demo branch environment.
 export const LoginPage = () => {
   const { login } = useAuth();
 
-  // Wake a sleeping free-tier API while the user enters credentials.
-  useEffect(() => { wakeBackend(); }, []);
   const navigate = useNavigate();
 
   const [identifier, setIdentifier] = useState('');
@@ -30,6 +27,10 @@ export const LoginPage = () => {
     e.preventDefault();
     setError('');
     setSuccessMsg('');
+    if (!displayName.trim()) {
+      setError('Enter your full name.');
+      return;
+    }
     setLoading(true);
 
     try {
@@ -87,16 +88,15 @@ export const LoginPage = () => {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {true && (
-              <Input
-                label="Your name"
-                type="text"
-                placeholder="Enter your name"
-                icon={User}
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-              />
-            )}
+            <Input
+              label="Full name"
+              type="text"
+              placeholder="Enter your full name"
+              icon={User}
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              required
+            />
             <Input
               label="Email address"
               type="email"

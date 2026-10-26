@@ -65,7 +65,7 @@ export const PerformanceLogModal = ({
     setFormData((prev) => ({
       ...prev,
       [field]: ['speed', 'stamina', 'strength', 'agility', 'accuracy', 'matches_played'].includes(field)
-        ? Number(val)
+        ? (val === '' ? '' : Number(val))
         : val
     }));
   };
@@ -342,7 +342,7 @@ export const PerformanceLogModal = ({
             loading={loading || uploadingEvidence}
             icon={Activity}
           >
-            {isOnline ? 'Submit & Run AI Assessment' : 'Save Locally to Offline Queue'}
+            {import.meta.env.VITE_DEMO_MODE === 'true' ? 'Save Performance Record' : isOnline ? 'Submit & Run AI Assessment' : 'Save Locally to Offline Queue'}
           </Button>
         </div>
       </form>

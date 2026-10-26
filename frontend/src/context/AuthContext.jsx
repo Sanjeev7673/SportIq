@@ -68,18 +68,17 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (identifier, password, displayName = '') => {
-    if (true) {
+    if (import.meta.env.VITE_DEMO_MODE === 'true') {
       const normalizedEmail = identifier.trim().toLowerCase();
-      const previousUser = authService.getCurrentUser();
       const enteredName = displayName.trim();
-      const inferredName = normalizedEmail.split('@')[0]
-        .replace(/[._-]+/g, ' ')
-        .replace(/\b\w/g, (letter) => letter.toUpperCase());
+      if (!enteredName || !normalizedEmail || !password) {
+        throw new Error('Enter your full name, email address, and password to continue.');
+      }
       const data = {
         access_token: 'sportiq-demo-session',
         user: {
           id: 'demo-player',
-          name: enteredName || (previousUser?.email === normalizedEmail && previousUser?.name && previousUser.name !== 'Demo Player' ? previousUser.name : '') || inferredName || 'Player',
+          name: enteredName,
           email: normalizedEmail,
           role: 'PLAYER',
         },
@@ -101,6 +100,15 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
     return data;
   };
+
+  const updateUser = useCallback((updates) => {
+    setUser((current) => {
+      if (!current) return current;
+      const next = { ...current, ...updates };
+      localStorage.setItem('sportiq_user', JSON.stringify(next));
+      return next;
+    });
+  }, []);
 
   const register = async (registerData) => authService.register(registerData);
 
@@ -124,6 +132,7 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     refreshUser,
+    updateUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
